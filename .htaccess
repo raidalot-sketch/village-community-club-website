@@ -1,0 +1,55 @@
+# -----------------------------------------------------------------------
+# Village Community Club — root .htaccess
+# Apache/LiteSpeed with mod_rewrite, mod_headers (standard on cPanel hosts)
+# -----------------------------------------------------------------------
+
+# Never list directory contents
+Options -Indexes
+Options +FollowSymLinks
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Force www-less or www — leave as-is; configure at DNS/cPanel level instead
+    # of here, to avoid conflicting with the host's own redirect rules.
+
+    # Friendly URLs: /news/my-article-slug -> news-detail.php?slug=my-article-slug
+    RewriteRule ^news/([a-z0-9\-]+)/?$ news-detail.php?slug=$1 [L,QSA]
+    RewriteRule ^events/([a-z0-9\-]+)/?$ event-detail.php?slug=$1 [L,QSA]
+</IfModule>
+
+# Block access to sensitive file types anywhere in the site
+<FilesMatch "\.(sql|log|md|env|ini|bak|sh)$">
+    Require all denied
+</FilesMatch>
+
+# Config folder holds database credentials — never serve it directly
+<IfModule mod_authz_core.c>
+    <Directory "config">
+        Require all denied
+    </Directory>
+</IfModule>
+
+# Custom, non-technical error pages
+ErrorDocument 404 /404.php
+ErrorDocument 500 /500.php
+
+# Security headers (also set in PHP — belt and braces if PHP is bypassed for static files)
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Sensible browser caching for static assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+</IfModule>
+
+php_flag display_errors off

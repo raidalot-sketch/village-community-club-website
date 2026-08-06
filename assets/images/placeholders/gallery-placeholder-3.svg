@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+  <rect width="600" height="600" fill="#e7f2ec"/>
+  <rect x="8" y="8" width="584" height="584" fill="none" stroke="#2f6d4f" stroke-width="2" stroke-dasharray="10 6"/>
+  <circle cx="300" cy="280" r="26" fill="#c9d9cf"/>
+  <path d="M 286 274 l 10 12 8 -8 12 16 h -36 z" fill="#2f6d4f" opacity="0.6"/>
+  <text x="300" y="338" font-family="Arial, sans-serif" font-size="18" fill="#234f39" text-anchor="middle" font-weight="bold">PLACEHOLDER</text>
+  <text x="300" y="360" font-family="Arial, sans-serif" font-size="14" fill="#5b5a52" text-anchor="middle">Gallery photo</text>
+</svg>

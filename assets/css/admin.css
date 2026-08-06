@@ -1,0 +1,92 @@
+/* =========================================================================
+   Admin area stylesheet. Loaded in addition to style.css so the admin
+   area shares the same brand colours/typography as the public site.
+   ========================================================================= */
+
+.admin-body { background: #f3f1ea; min-height: 100vh; }
+
+.admin-layout { display: flex; min-height: 100vh; }
+
+.admin-sidebar {
+    width: 250px; background: var(--color-primary-dark); color: #fff; flex-shrink: 0;
+    padding: var(--space-sm) 0; position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+.admin-sidebar__brand { padding: 0 var(--space-sm) var(--space-sm); font-family: var(--font-heading); font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.15); margin-bottom: var(--space-sm); }
+.admin-sidebar__brand a { color: #fff; text-decoration: none; }
+.admin-nav { list-style: none; margin: 0; padding: 0; }
+.admin-nav__group-title { padding: 0.5rem var(--space-sm); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #c9d4cd; margin-top: var(--space-xs); }
+.admin-nav a {
+    display: block; padding: 0.6rem var(--space-sm); color: #e9efe9; text-decoration: none; font-weight: 600;
+    border-left: 3px solid transparent;
+}
+.admin-nav a:hover, .admin-nav a.is-active { background: rgba(255,255,255,0.08); border-left-color: var(--color-accent); color: #fff; }
+
+.admin-main { flex: 1; min-width: 0; }
+.admin-topbar {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm);
+    background: #fff; padding: var(--space-sm) var(--space-md); border-bottom: 1px solid var(--color-border);
+    position: sticky; top: 0; z-index: 10;
+}
+.admin-topbar__toggle { display: none; }
+.admin-content { padding: var(--space-md); max-width: 1200px; }
+
+.admin-user-menu { display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem; }
+.admin-role-badge { background: var(--color-primary-light); color: var(--color-primary-dark); font-weight: 700; font-size: 0.75rem; padding: 0.15rem 0.55rem; border-radius: 999px; }
+
+@media (max-width: 900px) {
+    .admin-sidebar { position: fixed; left: -260px; top: 0; z-index: 200; transition: left 0.2s ease; box-shadow: var(--shadow-hover); }
+    .admin-sidebar.is-open { left: 0; }
+    .admin-topbar__toggle { display: inline-flex; }
+}
+
+/* ---- Dashboard stat cards ---- */
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-sm); margin-bottom: var(--space-md); }
+@media (max-width: 900px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .stat-grid { grid-template-columns: 1fr; } }
+.stat-card { background: #fff; border-radius: var(--radius-md); padding: var(--space-sm) var(--space-md); box-shadow: var(--shadow-card); border: 1px solid var(--color-border); }
+.stat-card__value { font-size: 2rem; font-family: var(--font-heading); color: var(--color-primary-dark); }
+.stat-card__label { color: var(--color-text-muted); font-weight: 600; }
+
+.quick-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: var(--space-md); }
+
+.admin-panel { background: #fff; border-radius: var(--radius-md); border: 1px solid var(--color-border); box-shadow: var(--shadow-card); padding: var(--space-md); margin-bottom: var(--space-md); }
+.admin-panel__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-sm); flex-wrap: wrap; gap: 0.5rem; }
+
+/* ---- Tables ---- */
+.admin-table-wrap { overflow-x: auto; }
+.admin-table { width: 100%; border-collapse: collapse; min-width: 640px; }
+.admin-table th, .admin-table td { text-align: left; padding: 0.75rem; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+.admin-table th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--color-text-muted); }
+.admin-table tr:hover td { background: var(--color-surface-alt); }
+.admin-table__actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.status-pill { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
+.status-pill--published { background: var(--color-success-bg); color: var(--color-success-text); }
+.status-pill--draft { background: #f0e6cf; color: #7a5b12; }
+.status-pill--new { background: #fde8d8; color: var(--color-accent-dark); }
+.status-pill--resolved { background: var(--color-success-bg); color: var(--color-success-text); }
+
+.thumb-preview { width: 56px; height: 56px; object-fit: cover; border-radius: var(--radius-sm); background: var(--color-primary-light); }
+
+/* ---- Admin forms ---- */
+.admin-form { display: grid; gap: var(--space-sm); max-width: 760px; }
+.admin-form--wide { max-width: none; }
+.admin-form .form-field textarea { min-height: 120px; }
+.admin-form fieldset { border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-sm); }
+.admin-form legend { font-weight: 700; padding: 0 0.4rem; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-sm); }
+@media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
+.current-image { display: flex; align-items: center; gap: var(--space-sm); margin-bottom: 0.5rem; }
+.field-error { color: var(--color-error-text); font-size: 0.85rem; margin-top: 0.25rem; }
+
+.editor-wrap .ql-toolbar { border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
+.editor-wrap .ql-container { border-radius: 0 0 var(--radius-sm) var(--radius-sm); min-height: 240px; font-family: var(--font-body); font-size: 1rem; }
+
+.login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--color-primary-dark); padding: var(--space-sm); }
+.login-card { background: #fff; border-radius: var(--radius-lg); padding: var(--space-lg); max-width: 420px; width: 100%; box-shadow: var(--shadow-hover); }
+.login-card h1 { text-align: center; }
+.login-card__logo { display: block; margin: 0 auto var(--space-sm); width: 64px; height: 64px; border-radius: 50%; }
+
+.confirm-inline { display: inline; }
+
+.drag-handle { cursor: grab; color: var(--color-text-muted); }
+.sortable-ghost { opacity: 0.4; }

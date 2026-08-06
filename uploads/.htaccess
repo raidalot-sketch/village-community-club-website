@@ -1,0 +1,11 @@
+# Uploaded files must NEVER be executable, no matter what extension they
+# were given. This blocks PHP (and other script types) from running even
+# if a malicious file slipped past upload validation.
+php_flag engine off
+AddHandler cgi-script .php .php3 .php4 .php5 .php7 .phtml .pl .py .cgi .asp .aspx .sh .exe
+Options -ExecCGI -Indexes -FollowSymLinks
+<IfModule mod_authz_core.c>
+    <FilesMatch "\.(php|phtml|php3|php4|php5|php7|pl|py|cgi|asp|aspx|sh|exe)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>

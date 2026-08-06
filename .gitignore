@@ -1,0 +1,25 @@
+# Real credentials — never commit
+config/config.php
+
+# Runtime logs
+logs/
+*.log
+
+# User-uploaded content (kept out of version control; back this up separately)
+uploads/*
+!uploads/.htaccess
+!uploads/news/.gitkeep
+!uploads/events/.gitkeep
+!uploads/newsletters/.gitkeep
+!uploads/gallery/.gitkeep
+!uploads/committee/.gitkeep
+!uploads/pages/.gitkeep
+
+# OS/editor cruft
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local installer lock artifacts
+config/installed.lock
