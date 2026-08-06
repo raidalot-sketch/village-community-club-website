@@ -26,7 +26,7 @@ function seo_add_schema(array $schema): void
 function seo_render_head(): void
 {
     $seo = $GLOBALS['__seo'];
-    $fullTitle = $seo['title'] . ' | ' . (defined('SITE_NAME') ? SITE_NAME : 'The Village Community Club');
+    $fullTitle = $seo['title'] . ' | ' . get_setting('site_name', defined('SITE_NAME') ? SITE_NAME : 'The Village Community Club');
     $canonical = $seo['canonical'] ?: site_url($_SERVER['REQUEST_URI'] ?? '');
     $description = $seo['description'];
 
@@ -35,7 +35,7 @@ function seo_render_head(): void
     echo '<link rel="canonical" href="' . e($canonical) . '">' . "\n";
 
     echo '<meta property="og:type" content="website">' . "\n";
-    echo '<meta property="og:site_name" content="' . e(defined('SITE_NAME') ? SITE_NAME : '') . '">' . "\n";
+    echo '<meta property="og:site_name" content="' . e(get_setting('site_name', defined('SITE_NAME') ? SITE_NAME : '')) . '">' . "\n";
     echo '<meta property="og:title" content="' . e($fullTitle) . '">' . "\n";
     echo '<meta property="og:description" content="' . e($description) . '">' . "\n";
     echo '<meta property="og:url" content="' . e($canonical) . '">' . "\n";
