@@ -99,8 +99,8 @@ function attempt_login(string $identifier, string $password): array
         return ['success' => false, 'message' => 'Too many failed login attempts. Please wait ' . LOGIN_LOCKOUT_MINUTES . ' minutes and try again.'];
     }
 
-    $stmt = db()->prepare('SELECT * FROM admin_users WHERE (username = :u OR email = :u) LIMIT 1');
-    $stmt->execute(['u' => $identifier]);
+    $stmt = db()->prepare('SELECT * FROM admin_users WHERE (username = :u1 OR email = :u2) LIMIT 1');
+    $stmt->execute(['u1' => $identifier, 'u2' => $identifier]);
     $user = $stmt->fetch();
 
     if (!$user || !$user['is_active'] || !password_verify($password, $user['password_hash'])) {
