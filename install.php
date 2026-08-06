@@ -27,6 +27,52 @@ function ie(?string $v): string
     return htmlspecialchars($v ?? '', ENT_QUOTES, 'UTF-8');
 }
 
+/**
+ * Splits a block of SQL into individual statements on ';' boundaries,
+ * WITHOUT splitting on semicolons that appear inside single-quoted string
+ * literals (e.g. HTML entities like "&gt;" in demo content, which contain
+ * a semicolon). A naive explode(';', $sql) breaks on those.
+ */
+function split_sql_statements(string $sql): array
+{
+    $statements = [];
+    $current = '';
+    $inString = false;
+    $length = strlen($sql);
+
+    for ($i = 0; $i < $length; $i++) {
+        $char = $sql[$i];
+        $current .= $char;
+
+        if ($char === "'" && $inString) {
+            // A doubled '' inside a string is an escaped literal quote, not the end of the string.
+            if (($sql[$i + 1] ?? '') === "'") {
+                $current .= "'";
+                $i++;
+                continue;
+            }
+            $inString = false;
+        } elseif ($char === "'" && !$inString) {
+            $inString = true;
+        } elseif ($char === '\\' && $inString) {
+            // Backslash-escapes the next character inside a string; consume it verbatim.
+            if ($i + 1 < $length) {
+                $current .= $sql[$i + 1];
+                $i++;
+            }
+        } elseif ($char === ';' && !$inString) {
+            $statements[] = substr($current, 0, -1);
+            $current = '';
+        }
+    }
+
+    if (trim($current) !== '') {
+        $statements[] = $current;
+    }
+
+    return $statements;
+}
+
 function installer_csrf_token(): string
 {
     if (empty($_SESSION['installer_csrf'])) {
@@ -175,7 +221,7 @@ if ($step === 2) {
                         }
                         $clean .= $line . "\n";
                     }
-                    $statements = array_filter(array_map('trim', explode(';', $clean)));
+                    $statements = array_filter(array_map('trim', split_sql_statements($clean)));
                     foreach ($statements as $statement) {
                         $pdo->exec($statement);
                     }
