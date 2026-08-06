@@ -71,8 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         // Set a cover automatically if the album doesn't have one yet.
-        db()->prepare('UPDATE gallery_albums SET cover_media_id = (SELECT id FROM media_items WHERE album_id = :id ORDER BY sort_order ASC LIMIT 1)
-            WHERE id = :id AND cover_media_id IS NULL')->execute(['id' => $id]);
+        db()->prepare('UPDATE gallery_albums SET cover_media_id = (SELECT id FROM media_items WHERE album_id = :id1 ORDER BY sort_order ASC LIMIT 1)
+            WHERE id = :id2 AND cover_media_id IS NULL')->execute(['id1' => $id, 'id2' => $id]);
         audit_log('gallery.upload', "Uploaded $uploaded image(s) to album #$id");
         flash_success($uploaded . ' photo(s) uploaded.');
         redirect('/admin/gallery-album-edit.php?id=' . $id);
