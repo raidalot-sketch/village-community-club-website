@@ -63,7 +63,7 @@ function club_prepare_attachment(array $file, bool $httpUpload=true): array {
     return ['storage_path'=>$target,'original_name'=>$name,'mime'=>$mime,'bytes'=>filesize($root.'/'.$target)];
 }
 function club_store_uploads(array $files,string $ownerType,int $ownerId,?int $userId=null): array {
-    if(!in_array($ownerType,['post','event','revision','contact','gallery','settings'],true))throw new RuntimeException('Invalid attachment context.');
+    if(!in_array($ownerType,['post','event','revision','contact','gallery','settings','editor'],true))throw new RuntimeException('Invalid attachment context.');
     $incoming=club_upload_files($files);if(!$incoming)return [];
     $stmt=db()->prepare('SELECT COUNT(*) FROM club_attachments WHERE owner_type=? AND owner_id=?');$stmt->execute([$ownerType,$ownerId]);
     if(count($incoming)+(int)$stmt->fetchColumn()>3)throw new RuntimeException('An enquiry or contribution can have up to three attachments.');
@@ -80,6 +80,12 @@ function club_attachment_list(string $ownerType,int $ownerId): array {
 function club_media_url(int $id): string {return site_url('/media.php?id='.$id);}
 function club_attachment_allowed(array $a): bool {
     $user=club_current_user();$uid=(int)($user['id']??0);
+    if($a['owner_type']==='editor'){
+        if(!$uid||(!club_can('content.submit')&&!club_can('content.publish')))return false;
+        $q=db()->prepare('SELECT user_id,post_id FROM club_editor_sessions WHERE id=? AND created_at>=DATE_SUB(NOW(),INTERVAL 7 DAY)');$q->execute([$a['owner_id']]);$session=$q->fetch();
+        if(!$session||(int)$session['user_id']!==$uid||(int)$a['user_id']!==$uid)return false;
+        if(!empty($session['post_id'])){$post=club_community_record('post',(int)$session['post_id']);return $post&&club_content_editable($post);}return true;
+    }
     if($a['owner_type']==='contact'){
         $q=db()->prepare('SELECT category FROM contact_enquiries WHERE id=?');$q->execute([$a['owner_id']]);$category=$q->fetchColumn();
         if(!$category)return false;
