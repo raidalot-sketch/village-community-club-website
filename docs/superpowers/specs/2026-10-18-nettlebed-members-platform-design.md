@@ -55,6 +55,22 @@ Use Europe/London for event display, recurrence and daylight-saving calculations
 
 Hall-hire enquiries remain enquiries. No room reservation, capacity promise, availability guarantee or double-booking prevention is implied by the events calendar. A booking-management system would be a separate agreed scope.
 
+## Members-only polls
+
+The user requested polls for club members. Proposed first version: members can draft a poll and submit it through the same moderation queue as posts/events; Publishers and Administrators approve publication. A published poll is visible only to eligible logged-in members. Polls are an additional confirmed feature; the detailed defaults below are design proposals for review.
+
+A poll contains a question, two or more text choices, optional explanation, opening time and required closing time. Use single-choice voting for the first version, with one recorded vote per eligible member per poll. Store member eligibility and a unique poll/member key server-side; disabling a button is not duplicate-vote protection. Proposed default: members can change their choice until closing, but cannot cast more than one current vote. The interface states this clearly.
+
+Proposed privacy default: ordinary screens, moderator views, exports and audit logs show aggregate totals, not who chose which option. The application still records the member association to enforce voting rules, so describe voting as private rather than technically anonymous. Privileged database operators may be able to access that association; do not promise anonymity. Administrator access to published results does not expose individual ballot choices through the product.
+
+Show the question, options, closing date/time, whether the member has voted and the total participation count. Proposed default: reveal choice totals and percentages after closing, to avoid influencing open votes. Define the eligible audience when publishing; proposed first version uses active approved members at the time of voting and does not remove an already accepted vote simply because membership later expires.
+
+Poll lifecycle: draft → submitted → approved/scheduled → open → closed, with a separate cancelled state. Opening/closing is determined on the server in Europe/London with timestamps handled consistently through daylight-saving changes. Members cannot vote early, after closing, on rejected/cancelled polls or without eligibility. If no one votes, show a clear zero-response state rather than calculating invalid percentages.
+
+Lock the question, choices and audience once voting starts. Material corrections require cancellation and a replacement poll, preserving the earlier record. Closing early/cancelling is a Publisher/Administrator action with a reason and audit entry. Treasurers have no special poll permissions unless separately assigned a publishing role.
+
+Private polls and results never enter public search, sitemaps, social feeds, social publishing queues or public exports. Voting does not send email or social messages. These are informal club opinion polls; do not label them formal elections, proxy votes or binding resolutions without a separately agreed process.
+
 ## Annual membership and Invoice
 
 Proposed membership states: awaiting review, awaiting payment, active, expired, suspended and cancelled. Payment state and moderation/account state remain separate.
@@ -107,6 +123,7 @@ Use HawkHost cron for reminders, integration delivery/retries and reconciliation
 - Bank-transfer membership remains pending until a verified treasurer/Invoice confirmation; duplicates and retries do not create extra invoices or extend membership twice.
 - Early renewal, expiry, pending payment, reversals and reminder deduplication have meaningful integration tests.
 - Social failures/expired credentials remain visible; retries do not duplicate posts; private details never enter public social payloads.
+- Poll eligibility, single-vote enforcement, concurrent submissions, change-of-vote, closing boundaries, result visibility and cancelled polls have server-side tests. No member ballot choices appear in public/member/admin aggregate screens or audit logs.
 - New features are tested in staging before release; no real membership payment, email or social post is sent as an incidental test.
 
 ## Remaining facts to confirm
@@ -122,4 +139,4 @@ These are configuration/release dependencies rather than permission to invent va
 
 ## Review record
 
-The user approved the role model in chat: submissions require approval, events can be public/members-only, Ed has administrator access and a separate treasurer role is available. This written design combines that approval with the previously requested calendar, payments and social integration. Written-spec approval is still pending. Implementation planning follows that approval.
+The user approved the role model in chat: submissions require approval, events can be public/members-only, Ed has administrator access and a separate treasurer role is available. This written design combines that approval with the previously requested calendar, payments and social integration. The user subsequently requested members-only polls; the proposed poll defaults are included above for review. Written-spec approval is still pending. Implementation planning follows that approval.
