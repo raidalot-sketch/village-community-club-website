@@ -13,7 +13,7 @@ require_once __DIR__ . '/includes/header.php';
             <h1><?= e(get_setting('home_hero_heading')) ?></h1>
             <p><?= e(get_setting('home_hero_subheading')) ?></p>
             <div class="hero__actions">
-                <a class="btn btn--primary" href="<?= e(site_url('/events.php')) ?>">See what’s on</a>
+                <a class="btn btn--primary" href="<?= e(site_url('/calendar.php')) ?>">See what’s on</a>
                 <a class="btn btn--secondary" href="<?= e(site_url('/hall-hire.php')) ?>">Hire a hall</a>
             </div>
             <p class="club-hero__location">32 High Street, Nettlebed · Oxfordshire</p>
@@ -26,8 +26,9 @@ require_once __DIR__ . '/includes/header.php';
 </section>
 <section class="section club-priorities"><div class="container club-priorities__layout">
     <div class="club-events">
-        <div class="section__header"><h2>Come for the company.</h2><a href="<?= e(site_url('/events.php')) ?>">What’s on</a></div>
+        <div class="section__header"><h2>Come for the company.</h2><a href="<?= e(site_url('/calendar.php')) ?>">What’s on</a></div>
         <p>Find your next evening out, catch up with friends and see what’s happening at the club.</p>
+        <?php require __DIR__.'/includes/home-calendar.php'; ?>
         <?php if ($events): ?>
         <div class="event-list"><?php foreach ($events as $event): ?>
             <a class="event-row" href="<?= e(site_url('/event-detail.php?slug=' . urlencode($event['slug']).'&date='.$event['occurrence_date'])) ?>">
