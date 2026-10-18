@@ -1,5 +1,45 @@
 <?php
 /** Opt-in Meta outbox delivery. No network work takes place during moderation. */
+/** Non-secret readiness diagnostics; connection tests never imply publishing permission. */
+function club_social_configuration(): array
+{
+    $page=defined('CLUB_META_PAGE_ID') && is_string(CLUB_META_PAGE_ID) && ctype_digit(CLUB_META_PAGE_ID);
+    $token=defined('CLUB_META_PAGE_TOKEN') && is_string(CLUB_META_PAGE_TOKEN) && CLUB_META_PAGE_TOKEN!=='' && !preg_match('/[\r\n]/',CLUB_META_PAGE_TOKEN);
+    $version=defined('CLUB_META_GRAPH_VERSION') && is_string(CLUB_META_GRAPH_VERSION) && (bool)preg_match('/^v\d+\.\d+$/D',CLUB_META_GRAPH_VERSION);
+    return ['page_id_configured'=>$page,'page_token_configured'=>$token,'graph_version_configured'=>$version,
+        'instagram_id_configured'=>defined('CLUB_META_INSTAGRAM_ID') && is_string(CLUB_META_INSTAGRAM_ID) && ctype_digit(CLUB_META_INSTAGRAM_ID),
+        'publish_enabled'=>defined('CLUB_SOCIAL_PUBLISH_ENABLED') && CLUB_SOCIAL_PUBLISH_ENABLED===true,
+        'preview'=>defined('SITE_PREVIEW') && SITE_PREVIEW===true,
+        'public_media_ready'=>club_social_public_media_ready(),
+        'read_probe_configured'=>$page && $token && $version];
+}
+
+/** Explicit read-only Page/linkage probe. Works before enabling delivery, including preview. */
+function club_social_connection_probe(bool $check=false, ?callable $transport=null): array
+{
+    $configuration=club_social_configuration();
+    $result=['configuration'=>$configuration,'checked'=>false,'page'=>'not_checked','instagram'=>$configuration['instagram_id_configured']?'not_checked':'not_configured','publishing_permissions'=>'not_verified','message'=>'No network check requested.'];
+    if(!$check)return $result;
+    if(PHP_SAPI!=='cli')throw new DomainException('Social connection checks are a command line operation.');
+    if(!$configuration['read_probe_configured']){$result['page']='configuration_required';$result['message']='Add a valid Page ID, private Page token and Graph version before checking the connection.';return $result;}
+    try {
+        // A GET only: never create media, posts, publish requests, subscriptions or permissions.
+        $page=club_social_graph('GET',CLUB_META_PAGE_ID,['fields'=>'id,name,instagram_business_account{id,username}'],$transport);
+        $result['checked']=true;
+        if(!is_string($page['id']??null) || !hash_equals(CLUB_META_PAGE_ID,$page['id'])){$result['page']='id_mismatch';$result['message']='The returned Page does not match the configured Page ID.';return $result;}
+        $result['page']='verified';
+        if($configuration['instagram_id_configured']){
+            $linked=$page['instagram_business_account']['id']??null;
+            $result['instagram']=!is_string($linked)?'link_unavailable':(hash_equals(CLUB_META_INSTAGRAM_ID,$linked)?'verified':'id_mismatch');
+        }
+        $result['message']='Page access checked. Publishing permissions and actual publication have not been verified.';
+        if($result['instagram']==='link_unavailable')$result['message']='Page access checked; Instagram linkage was not returned. Check linkage and token access. Publishing permissions remain unverified.';
+        elseif($result['instagram']==='id_mismatch')$result['message']='Page access checked; the linked Instagram account does not match the configured ID. Publishing permissions remain unverified.';
+    } catch(Throwable $e){$result['page']='check_failed';$result['message']='Meta connection could not be verified. Check private credentials, account access and Graph version.';}
+    // No raw provider strings, account names, IDs or token values enter diagnostics or logs.
+    return $result;
+}
+
 function club_social_connection_ready(string $channel): bool
 {
     if (!in_array($channel, ['facebook','instagram'], true) || !defined('CLUB_SOCIAL_PUBLISH_ENABLED') || CLUB_SOCIAL_PUBLISH_ENABLED !== true || (defined('SITE_PREVIEW') && SITE_PREVIEW)) return false;
