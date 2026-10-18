@@ -1,61 +1,17 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
-
-$slug = $_GET['slug'] ?? '';
-$stmt = db()->prepare("SELECT * FROM events WHERE slug = :slug AND status = 'published' AND deleted_at IS NULL");
-$stmt->execute(['slug' => $slug]);
-$event = $stmt->fetch();
-
-if (!$event) {
-    http_response_code(404);
-    require_once __DIR__ . '/includes/header.php';
-    echo '<section class="section container text-center"><h1>Event Not Found</h1><p>Sorry, we could not find that event. It may have already taken place or been removed.</p><p><a class="btn btn--primary" href="' . site_url('/events.php') . '">Back to Events</a></p></section>';
-    require_once __DIR__ . '/includes/footer.php';
-    exit;
+require_once __DIR__.'/includes/bootstrap.php';
+$private=club_private_events_allowed();$s=db()->prepare("SELECT * FROM events WHERE slug=? AND status='published' AND deleted_at IS NULL".($private?'':" AND visibility='public'"));$s->execute([(string)($_GET['slug']??'')]);$event=$s->fetch();
+$date=(string)($_GET['date']??($event['event_date']??''));$occurrence=null;
+if($event&&club_valid_date($date)){
+    $s=db()->prepare('SELECT occurrence_date FROM club_event_exceptions WHERE event_id=? AND cancelled=1');$s->execute([$event['id']]);$items=club_expand_event($event,$date,$date,$s->fetchAll(PDO::FETCH_COLUMN));foreach($items as $item)if($item['occurrence_date']===$date)$occurrence=$item;
 }
-
-$isPast = strtotime($event['event_date']) < strtotime('today');
-
-seo_set([
-    'title' => $event['meta_title'] ?: $event['title'],
-    'description' => $event['meta_description'] ?: truncate_text($event['description'] ?? '', 160),
-    'image' => $event['featured_image'] ? upload_url($event['featured_image']) : '',
-]);
-seo_add_schema(schema_event($event));
-
-require_once __DIR__ . '/includes/header.php';
+if(!$event||!$occurrence){http_response_code(404);seo_set(['title'=>'Event unavailable']);require __DIR__.'/includes/header.php';echo '<section class="section container"><h1>Event unavailable</h1><p>This event is unavailable or has been cancelled.</p><a href="'.e(site_url('/calendar.php')).'">Back to the calendar</a></section>';require __DIR__.'/includes/footer.php';exit;}
+if($event['visibility']==='members'){header('Cache-Control: private, no-store');header('X-Robots-Tag: noindex, nofollow');seo_set(['title'=>'Members’ event']);}else{seo_set(['title'=>$event['title'],'description'=>truncate_text($event['description']??'')]);}
+require __DIR__.'/includes/header.php';
 ?>
-
-<article class="section">
-    <div class="container" style="max-width:820px;">
-        <p><a href="<?= site_url('/events.php') ?>">&laquo; Back to Events</a></p>
-        <?php if ($isPast): ?><span class="tag">Past event</span><?php elseif ($event['is_featured']): ?><span class="card__badge">Featured</span><?php endif; ?>
-        <h1><?= e($event['title']) ?></h1>
-
-        <img src="<?= e($event['featured_image'] ? upload_url($event['featured_image']) : asset_url('images/placeholders/event-placeholder.svg')) ?>" alt="" style="border-radius:var(--radius-lg);margin-bottom:var(--space-md);" loading="lazy">
-
-        <div class="info-grid" style="margin-bottom:var(--space-md);">
-            <div class="info-block">
-                <h3>When</h3>
-                <p><?= e(format_date($event['event_date'], 'l j F Y')) ?><br>
-                <?php if ($event['start_time']): ?><?= e(format_time($event['start_time'])) ?><?= $event['end_time'] ? ' – ' . e(format_time($event['end_time'])) : '' ?><?php endif; ?></p>
-            </div>
-            <div class="info-block">
-                <h3>Where</h3>
-                <p><?= e($event['venue']) ?><br><?= e($event['address']) ?></p>
-            </div>
-            <div class="info-block">
-                <h3>Cost</h3>
-                <p><?= $event['is_free'] ? 'Free to attend' : '£' . number_format((float) $event['ticket_price'], 2) ?></p>
-                <?php if ($event['booking_info']): ?><p><?= e($event['booking_info']) ?></p><?php endif; ?>
-                <?php if ($event['booking_link'] && !$isPast): ?>
-                    <a class="btn btn--primary" href="<?= e($event['booking_link']) ?>" target="_blank" rel="noopener noreferrer">Book / More Info</a>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <div class="rich-content"><?= $event['description'] ?></div>
-    </div>
-</article>
-
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<article class="section"><div class="container" style="max-width:880px"><p><a href="<?= e(site_url('/calendar.php?month='.substr($date,0,7))) ?>">← Club calendar</a></p><span class="status-label"><?= $event['visibility']==='members'?'Members only':'Everyone welcome' ?></span><h1><?= e($event['title']) ?></h1><div class="platform-panel platform-grid"><div><h3>When</h3><p><?= e($occurrence['start_at']->format('l j F Y')) ?><br><?= $occurrence['all_day']?'All day':e($occurrence['start_at']->format('H:i').' – '.$occurrence['end_at']->format('H:i')) ?><?php if($event['end_date']&&$event['end_date']!==$event['event_date']): ?><br>Until <?= e($occurrence['end_at']->modify($occurrence['all_day']?'-1 day':'+0 days')->format('j F Y')) ?><?php endif ?></p></div><div><h3>Where</h3><p><?= e($event['venue']?:'Nettlebed Village Club') ?><br><?= e($event['address']) ?></p></div><div><h3>Coming along</h3><p><?= $event['is_free']?'Free to attend':($event['ticket_price']!==null?'£'.number_format((float)$event['ticket_price'],2):'Contact the club for details') ?></p><?= !empty($event['booking_info'])?'<p>'.e($event['booking_info']).'</p>':'' ?><?php if(!empty($event['booking_link'])&&preg_match('~^https?://~i',$event['booking_link'])): ?><a class="btn btn--primary" href="<?= e($event['booking_link']) ?>" rel="noopener noreferrer" target="_blank">Booking information</a><?php endif ?></div></div>
+<?php if(!empty($event['featured_image'])): ?><img src="<?= e(upload_url($event['featured_image'])) ?>" alt="" style="max-height:500px;width:auto;border-radius:12px" loading="lazy"><?php endif ?>
+<div class="rich-content"><?= sanitize_html($event['description']??'') ?></div><?php club_content_attachments('event',(int)$event['id']); ?>
+<?php if($event['recurrence']!=='none'): ?><p class="text-muted">Repeats <?= e($event['recurrence']) ?> until <?= e(format_date($event['recurrence_end_date'])) ?>. Individual dates may be cancelled.</p><?php endif ?>
+<?php if(club_content_editable($event)): ?><p><a class="btn btn--secondary" href="<?= e(site_url('/members/event-edit.php?id='.$event['id'])) ?>">Manage event</a></p><?php endif ?></div></article>
+<?php require __DIR__.'/includes/footer.php'; ?>
