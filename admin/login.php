@@ -34,11 +34,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <title>Admin Login — <?= e(get_setting('site_name', SITE_NAME)) ?></title>
 <link rel="stylesheet" href="<?= asset_url('css/style.css') ?>">
 <link rel="stylesheet" href="<?= asset_url('css/admin.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('css/nettlebed.css') ?>">
 </head>
 <body class="admin-body">
 <div class="login-wrap">
     <div class="login-card">
-        <img class="login-card__logo" src="<?= e(get_setting('logo_path') ? upload_url(get_setting('logo_path')) : asset_url('images/placeholders/logo-placeholder.svg')) ?>" alt="">
+        <img class="login-card__logo" src="<?= e(get_setting('logo_path') ? upload_url(get_setting('logo_path')) : asset_url('images/club-logo.jpg')) ?>" alt="">
         <h1>Admin Login</h1>
         <p style="text-align:center;color:var(--color-text-muted);"><?= e(get_setting('site_name', SITE_NAME)) ?></p>
 

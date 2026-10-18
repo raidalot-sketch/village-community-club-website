@@ -8,7 +8,7 @@ $errors = [];
 
 $fields = [
     'site_name', 'site_village', 'site_tagline',
-    'home_hero_heading', 'home_hero_subheading', 'home_welcome_message', 'membership_cta_text', 'footer_summary',
+    'hero_image_alt', 'home_hero_heading', 'home_hero_subheading', 'home_welcome_message', 'membership_cta_text', 'footer_summary',
     'opening_hours', 'contact_phone', 'contact_email',
     'address_line1', 'address_line2', 'address_town', 'address_postcode', 'address_country', 'map_embed_src',
     'social_facebook', 'social_instagram', 'social_x', 'social_youtube',
@@ -41,6 +41,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    if (empty($errors) && !empty($_FILES['hero_image']['name'])) {
+        $upload = handle_upload('hero_image', 'pages', 'image');
+        if ($upload['ok']) {
+            set_setting('hero_image_path', $upload['path']);
+        } else {
+            $errors[] = $upload['error'];
+        }
+    }
+
     if (empty($errors)) {
         audit_log('settings.update', 'Updated website settings');
         flash_success('Settings saved.');
@@ -67,13 +76,20 @@ require_once __DIR__ . '/includes/admin-header.php';
         <div class="form-field"><label for="site_tagline">Tagline</label><input type="text" id="site_tagline" name="site_tagline" value="<?= e(get_setting('site_tagline')) ?>"></div>
         <div class="form-field">
             <label for="logo">Club logo</label>
-            <div class="current-image"><img class="thumb-preview" id="logoPreview" src="<?= e(get_setting('logo_path') ? upload_url(get_setting('logo_path')) : asset_url('images/placeholders/logo-placeholder.svg')) ?>" alt=""><span>Current logo</span></div>
+            <div class="current-image"><img class="thumb-preview" id="logoPreview" src="<?= e(get_setting('logo_path') ? upload_url(get_setting('logo_path')) : asset_url('images/club-logo.jpg')) ?>" alt=""><span>Current logo</span></div>
             <input type="file" id="logo" name="logo" accept="image/jpeg,image/png,image/webp" data-preview-target="#logoPreview">
         </div>
     </fieldset>
 
     <fieldset>
         <legend>Home Page</legend>
+        <div class="form-field">
+            <label for="hero_image">Homepage photograph</label>
+            <div class="current-image"><img class="thumb-preview" id="heroPreview" src="<?= e(site_image_url('hero_image_path', 'images/club-building.jpg')) ?>" alt=""><span>Current homepage photograph</span></div>
+            <input type="file" id="hero_image" name="hero_image" accept="image/jpeg,image/png,image/webp" data-preview-target="#heroPreview">
+            <small class="hint">Choose a landscape photograph, up to 5 MB. Leave blank to keep the current image.</small>
+        </div>
+        <div class="form-field"><label for="hero_image_alt">Photograph description</label><input type="text" id="hero_image_alt" name="hero_image_alt" value="<?= e(get_setting('hero_image_alt', 'The courtyard and club building on Nettlebed High Street')) ?>"></div>
         <div class="form-field"><label for="home_hero_heading">Hero heading</label><input type="text" id="home_hero_heading" name="home_hero_heading" value="<?= e(get_setting('home_hero_heading')) ?>"></div>
         <div class="form-field"><label for="home_hero_subheading">Hero subheading</label><input type="text" id="home_hero_subheading" name="home_hero_subheading" value="<?= e(get_setting('home_hero_subheading')) ?>"></div>
         <div class="form-field"><label for="home_welcome_message">Welcome message</label><textarea id="home_welcome_message" name="home_welcome_message" rows="3"><?= e(get_setting('home_welcome_message')) ?></textarea></div>

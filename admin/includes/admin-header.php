@@ -22,9 +22,10 @@ function admin_nav_active(string ...$files): string
 <meta name="robots" content="noindex, nofollow">
 <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
 <title><?= e($pageTitle) ?> — Admin — <?= e(get_setting('site_name', SITE_NAME)) ?></title>
-<link rel="icon" type="image/svg+xml" href="<?= asset_url('images/placeholders/favicon.svg') ?>">
+<link rel="icon" type="image/jpeg" href="<?= asset_url('images/club-logo.jpg') ?>">
 <link rel="stylesheet" href="<?= asset_url('css/style.css') ?>">
 <link rel="stylesheet" href="<?= asset_url('css/admin.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('css/nettlebed.css') ?>">
 <link rel="stylesheet" href="<?= asset_url('vendor/quill/quill.snow.css') ?>">
 </head>
 <body class="admin-body">

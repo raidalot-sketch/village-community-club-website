@@ -12,6 +12,10 @@
 
 function send_email(string $to, string $subject, string $bodyText, ?string $replyTo = null): bool
 {
+    if (defined('MAIL_METHOD') && MAIL_METHOD === 'disabled') {
+        return false;
+    }
+
     $fromAddress = defined('MAIL_FROM_ADDRESS') ? MAIL_FROM_ADDRESS : 'noreply@example.com';
     $fromName = defined('MAIL_FROM_NAME') ? MAIL_FROM_NAME : 'Website';
 

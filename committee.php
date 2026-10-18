@@ -28,7 +28,7 @@ require_once __DIR__ . '/includes/header.php';
         </div>
 
         <?php if (empty($members)): ?>
-            <p class="empty-state">Committee members will appear here once added from the admin area.</p>
+            <p class="empty-state">Please contact the club for the current committee details.</p>
         <?php else: ?>
         <div class="committee-grid">
             <?php foreach ($members as $member): ?>

@@ -1,9 +1,9 @@
 -- =========================================================================
--- The Village Community Club — database installation script
+-- Nettlebed Village Club — database installation script
 -- MySQL 5.7+/MariaDB 10.3+, InnoDB, utf8mb4
 --
 -- This file creates every table needed by the website and admin system,
--- plus a small amount of demonstration content so the site is not empty
+-- plus club identity and editable page content
 -- on first install. It deliberately does NOT create an administrator
 -- account — run install.php in a browser after importing this file, and
 -- it will walk you through creating the first admin account securely.
@@ -262,64 +262,45 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- Default settings
 -- =========================================================================
 INSERT INTO settings (setting_key, setting_value) VALUES
-('site_name', 'The Village Community Club'),
-('site_village', 'Little Meadow Village'),
-('site_tagline', 'A warm welcome for everyone in Little Meadow Village'),
+('site_name', 'Nettlebed Village Club'),
+('site_village', 'Nettlebed'),
+('site_tagline', 'Events, hall hire and membership at Nettlebed Village Club.'),
 ('logo_path', ''),
-('about_summary', '[PLACEHOLDER] The Village Community Club has been at the heart of Little Meadow Village for generations, bringing residents together through friendship, activities and shared community spirit. Replace this text from Admin > Pages > Home.'),
-('footer_summary', '[PLACEHOLDER] The heart of Little Meadow Village — everyone is welcome.'),
-('opening_hours', 'Clubhouse: Tuesday & Thursday, 7pm–10pm\nSaturday mornings: 10am–12pm\n[PLACEHOLDER — update from Admin > Settings]'),
-('contact_phone', '01234 567890'),
-('contact_email', 'hello@example.com'),
-('address_line1', 'The Village Hall'),
-('address_line2', 'High Street'),
-('address_town', 'Little Meadow Village'),
-('address_postcode', 'AB12 3CD'),
+('hero_image_path', ''),
+('hero_image_alt', 'The courtyard and club building on Nettlebed High Street'),
+('about_summary', 'A community club on Nettlebed High Street with a bar, snooker room and two halls for hire.'),
+('footer_summary', 'Your village club on the High Street. Get together, enjoy an evening out or plan an occasion of your own.'),
+('opening_hours', 'Please check with the club for the latest opening hours before visiting.'),
+('contact_phone', '01491 641617'),
+('contact_email', 'thenettlebedclub@gmail.com'),
+('address_line1', '32 High Street'),
+('address_line2', ''),
+('address_town', 'Nettlebed'),
+('address_postcode', 'RG9 5DD'),
 ('address_country', 'GB'),
 ('map_embed_src', ''),
-('social_facebook', ''),
+('social_facebook', 'https://www.facebook.com/NettlebedVillageClub'),
 ('social_instagram', ''),
 ('social_x', ''),
 ('social_youtube', ''),
-('home_hero_heading', 'Welcome to The Village Community Club'),
-('home_hero_subheading', '[PLACEHOLDER] The friendly heart of Little Meadow Village'),
-('home_welcome_message', '[PLACEHOLDER] Whether you have lived here for fifty years or fifty days, there is always a warm welcome waiting for you at the Club. Replace this from Admin > Pages > Home.'),
-('membership_cta_text', '[PLACEHOLDER] Join today and become part of something special — membership starts from just £10 a year.')
+('home_hero_heading', 'At the heart of Nettlebed.'),
+('home_hero_subheading', 'Good company, familiar faces and room to celebrate. Your village club, right here on the High Street.'),
+('home_welcome_message', 'A community club with a bar, a snooker room and two halls for hire. Come to an event, enquire about membership or bring your own group together in a space close to home.'),
+('membership_cta_text', 'Interested in joining? Talk to the club about current membership options, prices and visiting arrangements.')
 ON DUPLICATE KEY UPDATE setting_key = setting_key;
 
 -- =========================================================================
 -- Editable page content (demo/placeholder — replace from Admin > Pages)
 -- =========================================================================
 INSERT INTO pages (page_key, title, content, meta_title, meta_description) VALUES
-('about', 'About the Club', '<p>[PLACEHOLDER CONTENT] The Village Community Club was founded to bring residents of Little Meadow Village together. Replace this paragraph from the admin area at Admin &gt; Pages &gt; About.</p><p>We host regular social evenings, seasonal celebrations, and activities for members of all ages.</p>', 'About Us', '[PLACEHOLDER] Learn about the history and mission of The Village Community Club.'),
-('membership', 'Membership', '<p>[PLACEHOLDER CONTENT] Membership is open to all residents of Little Meadow Village and the surrounding area. Replace this text from Admin &gt; Pages &gt; Membership.</p><h3>Membership Rates</h3><ul><li>Adult: £10 per year</li><li>Family: £18 per year</li><li>Concession: £5 per year</li></ul>', 'Membership', '[PLACEHOLDER] Find out how to join The Village Community Club.'),
-('facilities', 'Club Facilities & Activities', '<p>[PLACEHOLDER CONTENT] Our clubhouse offers a wide range of facilities and activities for members. Replace this text from Admin &gt; Pages &gt; Facilities.</p><ul><li>Main hall available for hire</li><li>Weekly craft group</li><li>Monthly quiz night</li><li>Table tennis and darts</li></ul>', 'Facilities & Activities', '[PLACEHOLDER] Discover the facilities and activities on offer at the Club.'),
-('committee_intro', 'Committee & Club Officials', '<p>[PLACEHOLDER CONTENT] Our committee is made up of local volunteers who give their time to keep the Club running. Replace this text from Admin &gt; Pages &gt; Committee.</p>', 'Committee', '[PLACEHOLDER] Meet the volunteers who run The Village Community Club.'),
-('privacy', 'Privacy Policy', '<p><strong>[PLACEHOLDER — this draft policy must be reviewed by the Club and, if in doubt, a qualified advisor before the site goes live. It is a starting point only, not legal advice.]</strong></p><h3>What information we collect</h3><p>[PLACEHOLDER] We collect information you provide through our contact form (name, email, phone number and message), and, if you apply for membership, the details on your membership form.</p><h3>How we use your information</h3><p>[PLACEHOLDER] We use your information only to respond to your enquiry or to administer your membership. We do not sell or share your data with third parties for marketing purposes.</p><h3>How long we keep your information</h3><p>[PLACEHOLDER] Contact form messages are kept for as long as needed to deal with your enquiry. Membership records are kept for the duration of membership plus a reasonable retention period.</p><h3>Your rights</h3><p>[PLACEHOLDER] You have the right to ask what information we hold about you, to ask us to correct it, and to ask us to delete it. Contact the Club using the details on our Contact page.</p>', 'Privacy Policy', '[PLACEHOLDER] How The Village Community Club collects, uses and protects your personal information.'),
-('cookies', 'Cookie Policy', '<p><strong>[PLACEHOLDER — this draft policy must be reviewed by the Club before the site goes live.]</strong></p><h3>Essential cookies</h3><p>[PLACEHOLDER] We use one essential cookie to remember your cookie preference. This cookie does not track you and cannot be disabled without disabling cookies in your browser entirely.</p><h3>Optional cookies</h3><p>[PLACEHOLDER] If you choose to accept optional cookies, embedded content such as YouTube videos and Google Maps may set their own cookies. These are only loaded after you give consent, or when you click to load that specific item.</p><h3>Managing cookies</h3><p>[PLACEHOLDER] You can change your cookie choice at any time by clearing your browser cookies for this site and reloading the page.</p>', 'Cookie Policy', '[PLACEHOLDER] How and why The Village Community Club uses cookies on this website.'),
-('accessibility', 'Accessibility Statement', '<p>[PLACEHOLDER] The Village Community Club wants this website to be accessible to everyone, including people with visual, hearing, motor or cognitive impairments.</p><h3>What we have done</h3><ul><li>Used clear, large, readable text throughout</li><li>Provided text alternatives for images</li><li>Ensured the site can be navigated by keyboard</li><li>Provided a "skip to content" link on every page</li><li>Used sufficient colour contrast</li></ul><h3>Feedback</h3><p>[PLACEHOLDER] If you find any part of this website difficult to use, please contact us using the details on our Contact page and we will do our best to help.</p>', 'Accessibility Statement', '[PLACEHOLDER] Our commitment to making this website accessible to all visitors.')
+('about', 'Your village club', '<p>Nettlebed Village Club brings people together on the High Street. With a bar, a snooker room and two halls for hire, it is a place for social evenings, activities and occasions.</p><h2>A part of village life</h2><p>The building opened in 1913 and has been part of Nettlebed life ever since.</p><h2>Come and get to know us</h2><p>Ask about an upcoming event, membership or visiting the bar. The club can help you find the information you need before you come.</p>', 'Our club', 'Get to know Nettlebed Village Club on the High Street.'),
+('membership', 'Make yourself part of it.', '<p>Membership is a way to be part of club life in Nettlebed. Get in touch to ask about current membership options, annual fees and how to apply.</p><h2>Thinking of visiting?</h2><p>Contact the club about guest arrangements and opening hours before your visit.</p><h2>Already a member?</h2><p>The club can help with renewal enquiries and questions about your membership.</p>', 'Membership', 'Ask about membership and visiting Nettlebed Village Club.'),
+('hall_hire', 'Hall hire', '<h2>Two halls. Plenty of possibilities.</h2><p>Bring people together for a celebration, a meeting or a regular group activity at Nettlebed Village Club.</p><h2>Find the right space</h2><p>Tell the club what you have in mind, how many people you expect and your preferred date. The club will confirm room suitability, facilities, availability and current hire charges.</p><h2>Make an enquiry</h2><p>Use the enquiry form or telephone the club to discuss your plans. Please confirm capacities and arrangements with the club before booking.</p>', 'Hall hire', 'Enquire about hiring a hall at Nettlebed Village Club.'),
+('facilities', 'Make time for your club.', '<h2>Meet at the bar</h2><p>The club has a bar and a snooker room. Please ask about membership, guest arrangements and opening hours before visiting.</p><h2>Get together in the halls</h2><p>Two halls provide space for activities and private hire. Contact the club to ask about current groups, events or a regular booking.</p>', 'Facilities & activities', 'Explore the bar, snooker room and halls at Nettlebed Village Club.'),
+('committee_intro', 'The people behind the club', '<p>For committee enquiries, please contact the club using the details on the contact page.</p>', 'Committee', 'Contact the committee at Nettlebed Village Club.'),
+('privacy', 'Privacy Policy', '<p><strong>[PLACEHOLDER — this draft policy must be reviewed by the Club and, if in doubt, a qualified advisor before the site goes live. It is a starting point only, not legal advice.]</strong></p><h3>What information we collect</h3><p>[PLACEHOLDER] We collect information you provide through our contact form (name, email, phone number and message), and, if you apply for membership, the details on your membership form.</p><h3>How we use your information</h3><p>[PLACEHOLDER] We use your information only to respond to your enquiry or to administer your membership. We do not sell or share your data with third parties for marketing purposes.</p><h3>How long we keep your information</h3><p>[PLACEHOLDER] Contact form messages are kept for as long as needed to deal with your enquiry. Membership records are kept for the duration of membership plus a reasonable retention period.</p><h3>Your rights</h3><p>[PLACEHOLDER] You have the right to ask what information we hold about you, to ask us to correct it, and to ask us to delete it. Contact the Club using the details on our Contact page.</p>', 'Privacy Policy', '[PLACEHOLDER] How Nettlebed Village Club collects, uses and protects your personal information.'),
+('cookies', 'Cookie Policy', '<p><strong>[PLACEHOLDER — this draft policy must be reviewed by the Club before the site goes live.]</strong></p><h3>Essential cookies</h3><p>[PLACEHOLDER] We use one essential cookie to remember your cookie preference. This cookie does not track you and cannot be disabled without disabling cookies in your browser entirely.</p><h3>Optional cookies</h3><p>[PLACEHOLDER] If you choose to accept optional cookies, embedded content such as YouTube videos and Google Maps may set their own cookies. These are only loaded after you give consent, or when you click to load that specific item.</p><h3>Managing cookies</h3><p>[PLACEHOLDER] You can change your cookie choice at any time by clearing your browser cookies for this site and reloading the page.</p>', 'Cookie Policy', '[PLACEHOLDER] How and why Nettlebed Village Club uses cookies on this website.'),
+('accessibility', 'Accessibility Statement', '<p>[PLACEHOLDER] Nettlebed Village Club wants this website to be accessible to everyone, including people with visual, hearing, motor or cognitive impairments.</p><h3>What we have done</h3><ul><li>Used clear, large, readable text throughout</li><li>Provided text alternatives for images</li><li>Ensured the site can be navigated by keyboard</li><li>Provided a "skip to content" link on every page</li><li>Used sufficient colour contrast</li></ul><h3>Feedback</h3><p>[PLACEHOLDER] If you find any part of this website difficult to use, please contact us using the details on our Contact page and we will do our best to help.</p>', 'Accessibility Statement', '[PLACEHOLDER] Our commitment to making this website accessible to all visitors.')
 ON DUPLICATE KEY UPDATE page_key = page_key;
 
 -- =========================================================================
--- Demonstration content — clearly marked as placeholder, safe to delete
--- =========================================================================
-INSERT INTO news_articles (title, slug, summary, content, author, status, is_featured, published_at) VALUES
-('[SAMPLE] Club Reopens After Summer Break', 'sample-club-reopens-after-summer-break', '[PLACEHOLDER] We are delighted to announce the Club is reopening its doors after the summer break, with a full programme of autumn activities.', '<p>[PLACEHOLDER ARTICLE] This is sample content — replace or delete it from Admin &gt; News. We are delighted to announce the Club is reopening its doors after the summer break, with a full programme of autumn activities planned for members of all ages.</p>', 'The Committee', 'published', 1, NOW()),
-('[SAMPLE] New Craft Group Launching This Month', 'sample-new-craft-group-launching-this-month', '[PLACEHOLDER] A brand new craft group starts this month, meeting every Wednesday afternoon in the small hall.', '<p>[PLACEHOLDER ARTICLE] This is sample content — replace or delete it from Admin &gt; News.</p>', 'Jane Smith', 'published', 0, NOW() - INTERVAL 5 DAY),
-('[SAMPLE] Thank You to Everyone Who Supported the Fete', 'sample-thank-you-village-fete', '[PLACEHOLDER] A huge thank you to everyone who came along and volunteered at this year''s village fete.', '<p>[PLACEHOLDER ARTICLE] This is sample content — replace or delete it from Admin &gt; News.</p>', 'The Committee', 'published', 0, NOW() - INTERVAL 12 DAY);
-
-INSERT INTO events (title, slug, description, event_date, start_time, end_time, venue, address, booking_info, is_free, ticket_price, is_featured, status) VALUES
-('[SAMPLE] Autumn Quiz Night', 'sample-autumn-quiz-night', '[PLACEHOLDER] Join us for a fun evening of trivia, raising funds for the Club. Teams of up to six — replace this from Admin &gt; Events.', DATE_ADD(CURDATE(), INTERVAL 14 DAY), '19:00:00', '22:00:00', 'The Village Hall', 'High Street, Little Meadow Village', 'Tickets available on the door or in advance from the Club.', 0, 3.50, 1, 'published'),
-('[SAMPLE] Family Craft Afternoon', 'sample-family-craft-afternoon', '[PLACEHOLDER] A relaxed drop-in craft session for all the family — replace this from Admin &gt; Events.', DATE_ADD(CURDATE(), INTERVAL 21 DAY), '14:00:00', '16:00:00', 'The Village Hall (Small Room)', 'High Street, Little Meadow Village', 'No booking required, all welcome.', 1, NULL, 0, 'published'),
-('[SAMPLE] Annual General Meeting', 'sample-annual-general-meeting', '[PLACEHOLDER] All members are welcome to attend the Club''s Annual General Meeting — replace this from Admin &gt; Events.', DATE_ADD(CURDATE(), INTERVAL 35 DAY), '19:30:00', '21:00:00', 'The Village Hall', 'High Street, Little Meadow Village', 'Open to all paid-up members.', 1, NULL, 0, 'published');
-
-INSERT INTO newsletters (title, issue_number, issue_month, issue_year, description, pdf_path, is_published) VALUES
-('[SAMPLE] Village Club Newsletter', 'Issue 1', MONTH(CURDATE()), YEAR(CURDATE()), '[PLACEHOLDER] Sample newsletter entry — upload a real PDF and edit this from Admin > Newsletters.', 'newsletters/sample-placeholder.pdf', 1);
-
-INSERT INTO gallery_albums (title, slug, description, sort_order) VALUES
-('[SAMPLE] Summer Fete 2025', 'sample-summer-fete-2025', '[PLACEHOLDER] Sample album — replace with real photos from Admin > Gallery.', 1);
-
-INSERT INTO committee_members (name, role_title, bio, is_published, sort_order) VALUES
-('[PLACEHOLDER NAME]', 'Chairperson', '[PLACEHOLDER] Add a short biography for this committee member from Admin > Committee.', 1, 1),
-('[PLACEHOLDER NAME]', 'Secretary', '[PLACEHOLDER] Add a short biography for this committee member from Admin > Committee.', 1, 2),
-('[PLACEHOLDER NAME]', 'Treasurer', '[PLACEHOLDER] Add a short biography for this committee member from Admin > Committee.', 1, 3);

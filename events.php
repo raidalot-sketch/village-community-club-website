@@ -38,7 +38,8 @@ require_once __DIR__ . '/includes/header.php';
 <section class="section">
     <div class="container">
         <?php if (empty($events)): ?>
-            <p class="empty-state"><?= $showPast ? 'No past events to show yet.' : 'No upcoming events are scheduled yet. Check back soon.' ?></p>
+            <p class="empty-state"><?= $showPast ? 'No past events to show yet.' : 'The website calendar is being prepared. Visit our Facebook page or contact the club for the latest events.' ?></p>
+        <?php if (!$showPast): ?><p class="text-center"><a href="<?= e(get_setting('social_facebook')) ?>" target="_blank" rel="noopener noreferrer">See the latest on Facebook<span class="visually-hidden"> (opens in a new tab)</span></a></p><?php endif; ?>
         <?php else: ?>
         <div class="card-grid">
             <?php foreach ($events as $event): ?>

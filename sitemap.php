@@ -12,6 +12,7 @@ $urls = [
     ['loc' => site_url('/gallery.php'), 'priority' => '0.6'],
     ['loc' => site_url('/membership.php'), 'priority' => '0.8'],
     ['loc' => site_url('/facilities.php'), 'priority' => '0.6'],
+    ['loc' => site_url('/hall-hire.php'), 'priority' => '0.8'],
     ['loc' => site_url('/committee.php'), 'priority' => '0.5'],
     ['loc' => site_url('/contact.php'), 'priority' => '0.7'],
     ['loc' => site_url('/privacy-policy.php'), 'priority' => '0.2'],

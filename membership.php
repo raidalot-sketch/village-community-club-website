@@ -14,7 +14,7 @@ require_once __DIR__ . '/includes/header.php';
 <section class="page-hero">
     <div class="container">
         <h1><?= e($page['title'] ?? 'Membership') ?></h1>
-        <p>Everyone in <?= e(get_setting('site_village', SITE_VILLAGE)) ?> is welcome to join.</p>
+        <p>Find out about becoming a member of your village club.</p>
     </div>
 </section>
 

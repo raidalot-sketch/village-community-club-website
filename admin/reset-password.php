@@ -36,6 +36,7 @@ if (!$token || !$adminId) {
 <title>Reset Password — Admin</title>
 <link rel="stylesheet" href="<?= asset_url('css/style.css') ?>">
 <link rel="stylesheet" href="<?= asset_url('css/admin.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('css/nettlebed.css') ?>">
 </head>
 <body class="admin-body">
 <div class="login-wrap">

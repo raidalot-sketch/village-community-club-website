@@ -1,3 +1,11 @@
+# Nettlebed launch checklist
+
+The October rebuild now supplies the club name, address, public contact details, logo, photograph and core page copy. It no longer seeds sample news, events, newsletters or committee members. See [NETTLEBED-REBUILD.md](NETTLEBED-REBUILD.md) for current evidence and outstanding launch checks.
+
+The original generic checklist below is retained for historical context; its placeholder inventory describes the August template, not the October rebuild.
+
+---
+
 # Pre-Launch Checklist
 
 Everything below is placeholder content, included so the site is fully

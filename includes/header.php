@@ -1,22 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <?php seo_render_head(); ?>
-<link rel="icon" type="image/svg+xml" href="<?= asset_url('images/placeholders/favicon.svg') ?>">
+<link rel="icon" type="image/jpeg" href="<?= asset_url('images/club-logo.jpg') ?>">
 <link rel="stylesheet" href="<?= asset_url('css/style.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('css/nettlebed.css') ?>">
 </head>
 <body>
+<?php if ((defined('APP_ENV') && APP_ENV !== 'production') || (defined('SITE_PREVIEW') && SITE_PREVIEW)): ?><div class="preview-notice">Website preview · Club details are being prepared for launch</div><?php endif; ?>
 <a class="skip-link" href="#main-content">Skip to main content</a>
 
 <header class="site-header">
     <div class="site-header__bar container">
         <a class="site-header__brand" href="<?= site_url('/index.php') ?>">
-            <img class="site-header__logo" src="<?= e(get_setting('logo_path') ? upload_url(get_setting('logo_path')) : asset_url('images/placeholders/logo-placeholder.svg')) ?>" alt="<?= e(get_setting('site_name', SITE_NAME)) ?> logo" width="56" height="56">
+            <img class="site-header__logo" src="<?= e(get_setting('logo_path') ? upload_url(get_setting('logo_path')) : asset_url('images/club-logo.jpg')) ?>" alt="<?= e(get_setting('site_name', SITE_NAME)) ?> logo" width="56" height="56">
             <span class="site-header__titles">
                 <span class="site-header__name"><?= e(get_setting('site_name', SITE_NAME)) ?></span>
-                <span class="site-header__village"><?= e(get_setting('site_village', SITE_VILLAGE)) ?></span>
+                <span class="site-header__village"><?= e('High Street · ' . get_setting('site_village', SITE_VILLAGE)) ?></span>
             </span>
         </a>
 

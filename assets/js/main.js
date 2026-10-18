@@ -4,6 +4,7 @@
  */
 (function () {
     'use strict';
+    document.documentElement.classList.add('js');
 
     // ---------------------------------------------------------------
     // Mobile navigation toggle
@@ -17,9 +18,17 @@
             navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         });
 
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && primaryNav.classList.contains('is-open')) {
+                primaryNav.classList.remove('is-open');
+                navToggle.setAttribute('aria-expanded', 'false');
+                navToggle.focus();
+            }
+        });
+
         // Close the menu when a link is chosen (mobile).
         primaryNav.addEventListener('click', function (e) {
-            if (e.target.tagName === 'A' && window.innerWidth <= 860) {
+            if (e.target.tagName === 'A' && window.innerWidth <= 1100) {
                 primaryNav.classList.remove('is-open');
                 navToggle.setAttribute('aria-expanded', 'false');
             }

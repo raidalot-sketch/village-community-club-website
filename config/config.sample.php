@@ -23,9 +23,9 @@ define('DB_CHARSET', 'utf8mb4');
 // ---------------------------------------------------------------------
 // Site identity (also editable later from Admin > Settings)
 // ---------------------------------------------------------------------
-define('SITE_NAME', 'The Village Community Club');
-define('SITE_VILLAGE', 'Little Meadow Village');
-define('SITE_URL', 'http://localhost/village-community-club'); // no trailing slash
+define('SITE_NAME', 'Nettlebed Village Club');
+define('SITE_VILLAGE', 'Nettlebed');
+define('SITE_URL', 'https://nettlebedvillageclub.co.uk'); // no trailing slash
 
 // ---------------------------------------------------------------------
 // Security

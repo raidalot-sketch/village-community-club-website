@@ -1,9 +1,11 @@
-# The Village Community Club — Website & Admin System
+# Nettlebed Village Club — Website & Admin System
 
-A complete, self-hosted website for a small village community club, built with
+A self-hosted website for Nettlebed Village Club, built with
 plain PHP, MySQL/MariaDB, semantic HTML5, modern CSS3 and vanilla JavaScript.
 No paid services, no Node.js requirement, no build step — designed to run on
 ordinary shared hosting with cPanel.
+
+Current rebuild status and launch checks: [documentation/NETTLEBED-REBUILD.md](documentation/NETTLEBED-REBUILD.md). The selected domain is **nettlebedvillageclub.co.uk**; it is registered and Active in Cloudflare, verified on 18 October 2026.
 
 This document explains how to install, configure, maintain and safely update
 the site. See also [`documentation/PRELAUNCH-CHECKLIST.md`](documentation/PRELAUNCH-CHECKLIST.md)

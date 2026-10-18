@@ -6,7 +6,7 @@
  * empty MySQL/MariaDB database in cPanel. It will:
  *   1. Check server requirements
  *   2. Save your database and site details to config/config.php
- *   3. Import the database schema and demonstration content
+ *   3. Import the database schema and club content
  *   4. Create your first administrator account
  *
  * When finished, it writes config/installed.lock and refuses to run
@@ -181,8 +181,8 @@ if ($step === 2) {
             $dbUser = trim($_POST['db_user'] ?? '');
             $dbPass = $_POST['db_pass'] ?? '';
             $siteUrl = rtrim(trim($_POST['site_url'] ?? ''), '/');
-            $siteName = trim($_POST['site_name'] ?? '') ?: 'The Village Community Club';
-            $siteVillage = trim($_POST['site_village'] ?? '') ?: 'Little Meadow Village';
+            $siteName = trim($_POST['site_name'] ?? '') ?: 'Nettlebed Village Club';
+            $siteVillage = trim($_POST['site_village'] ?? '') ?: 'Nettlebed';
             $mailTo = trim($_POST['mail_to'] ?? '');
 
             if ($dbHost === '' || $dbName === '' || $dbUser === '') {
@@ -288,8 +288,8 @@ if ($step === 2) {
     $html .= '<label for="db_pass">Database password</label><input id="db_pass" type="password" name="db_pass" value="">';
     $html .= '<hr style="margin:1.5rem 0;">';
     $html .= '<label for="site_url">Full website address (URL)</label><input id="site_url" name="site_url" placeholder="https://www.example.com" value="' . ie($_POST['site_url'] ?? '') . '" required>';
-    $html .= '<label for="site_name">Club name</label><input id="site_name" name="site_name" value="' . ie($_POST['site_name'] ?? 'The Village Community Club') . '">';
-    $html .= '<label for="site_village">Village name</label><input id="site_village" name="site_village" value="' . ie($_POST['site_village'] ?? 'Little Meadow Village') . '">';
+    $html .= '<label for="site_name">Club name</label><input id="site_name" name="site_name" value="' . ie($_POST['site_name'] ?? 'Nettlebed Village Club') . '">';
+    $html .= '<label for="site_village">Village name</label><input id="site_village" name="site_village" value="' . ie($_POST['site_village'] ?? 'Nettlebed') . '">';
     $html .= '<label for="mail_to">Email address for contact form messages</label><input id="mail_to" type="email" name="mail_to" value="' . ie($_POST['mail_to'] ?? '') . '" required>';
     $html .= '<p style="margin-top:1.5rem;"><button class="btn btn--primary" type="submit">Save & Import Database &raquo;</button></p>';
     $html .= '</form>';

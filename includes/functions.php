@@ -203,3 +203,19 @@ function is_placeholder(?string $value): bool
 {
     return empty($value) || str_starts_with(trim($value), '[PLACEHOLDER') || str_starts_with(trim($value), '[SAMPLE');
 }
+
+/** Resolve an administrator-uploaded image, falling back to a shipped club asset. */
+function site_image_url(string $settingKey, string $fallback): string
+{
+    $path = get_setting($settingKey, '');
+    return $path !== '' ? upload_url($path) : asset_url($fallback);
+}
+
+/** Format the same editable address everywhere; omit empty address lines. */
+function club_address(): string
+{
+    $parts = array_map(fn($key) => trim(get_setting($key, '')), [
+        'address_line1', 'address_line2', 'address_town', 'address_postcode',
+    ]);
+    return implode("\n", array_filter($parts, fn($part) => $part !== ''));
+}
