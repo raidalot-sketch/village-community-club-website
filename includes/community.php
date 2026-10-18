@@ -14,17 +14,26 @@ function club_content_audit(string $action,string $kind,int $id,array $details=[
 }
 function club_valid_date(string $date):bool { $d=DateTimeImmutable::createFromFormat('!Y-m-d',$date,new DateTimeZone('Europe/London')); return $d && $d->format('Y-m-d')===$date; }
 function club_content_payload(string $kind,array $input,array $editorMediaIds=[]):array {
+    $richPost=$kind==='post'&&($input['content_format']??'')==='html';
+    $postKind=$richPost?(string)($input['post_kind']??'article'):'article';
+    if($richPost&&!in_array($postKind,['post','article'],true))throw new InvalidArgumentException('Choose a post or an article.');
     $title=trim((string)($input['title']??''));
-    if ($title==='' || mb_strlen($title)>190) throw new InvalidArgumentException('Enter a title of up to 190 characters.');
+    if ((!$richPost||$postKind==='article')&&($title==='' || mb_strlen($title)>190)) throw new InvalidArgumentException('Enter a title of up to 190 characters.');
     $body=trim((string)($input[$kind==='post'?'content':'description']??''));
     if ($body==='' || mb_strlen($body)>50000) throw new InvalidArgumentException('Enter the details, up to 50,000 characters.');
     if($kind==='post'&&($input['content_format']??'')==='html') {
         $body=club_editor_sanitize($body,$editorMediaIds);
         if(trim(strip_tags($body))===''&&!club_editor_inline_ids($body))throw new InvalidArgumentException('Enter the post details.');
+        if($postKind==='post'){
+            $plain=preg_replace('/<(?:br\b[^>]*|\/(?:p|h2|h3|blockquote|li|ul|ol|figure|figcaption))>/i',' ',$body);
+            $plain=html_entity_decode(strip_tags($plain),ENT_QUOTES|ENT_HTML5,'UTF-8');
+            $plain=trim(preg_replace('/[\s\p{Z}]+/u',' ',$plain));
+            $title=$plain!==''?mb_substr($plain,0,90):'Photo update';
+        }
         $summary=trim((string)($input['summary']??''));if(mb_strlen($summary)>300)throw new InvalidArgumentException('The summary can have up to 300 characters.');
         $cover=(int)($input['cover_attachment_id']??0);
         if($cover&&!in_array($cover,$editorMediaIds,true))throw new InvalidArgumentException('Choose a cover photograph from this post.');
-        return ['title'=>$title,'content'=>$body,'summary'=>$summary?:null,'cover_attachment_id'=>$cover?:null];
+        return ['title'=>$title,'content'=>$body,'post_kind'=>$postKind,'summary'=>$summary?:null,'cover_attachment_id'=>$cover?:null];
     }
     $body=nl2br(e($body));
     if ($kind==='post') return ['title'=>$title,'content'=>$body];
@@ -108,7 +117,7 @@ function club_content_moderate(string $kind,int $id,string $action,string $note=
                     foreach($removed as $attachmentId)$pdo->prepare("UPDATE club_attachments SET owner_type='post_removed' WHERE id=? AND owner_type='post' AND owner_id=?")->execute([$attachmentId,$id]);
                     club_editor_attachment_limit('revision',$revisionId,$id);
                 }
-                $allowed=$kind==='post'?['title','content','summary','cover_attachment_id']:['title','description','event_date','end_date','start_time','end_time','venue','booking_link','visibility','recurrence','recurrence_end_date'];$payload=array_intersect_key($payload,array_flip($allowed));
+                $allowed=$kind==='post'?['title','content','summary','cover_attachment_id','post_kind']:['title','description','event_date','end_date','start_time','end_time','venue','booking_link','visibility','recurrence','recurrence_end_date'];$payload=array_intersect_key($payload,array_flip($allowed));
                 if($kind==='event'&&($payload['visibility']??$row['visibility'])==='members'&&!empty($row['featured_image']))throw new InvalidArgumentException('Move the legacy public photograph to protected storage before approving a members-only event.');
                 $assign=implode(',',array_map(fn($key)=>"$key=?",array_keys($payload)));$pdo->prepare("UPDATE $table SET $assign WHERE id=?")->execute([...array_values($payload),$id]);
                 $pdo->prepare("UPDATE club_attachments SET owner_type=?,owner_id=? WHERE owner_type='revision' AND owner_id=?")->execute([$kind,$id,$revisionId]);
