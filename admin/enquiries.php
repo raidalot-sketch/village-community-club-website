@@ -1,92 +1,11 @@
 <?php
-require_once __DIR__ . '/../includes/bootstrap.php';
-require_login();
-
-$pageTitle = 'Contact Enquiries';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    csrf_verify();
-    $id = (int) ($_POST['id'] ?? 0);
-    $action = $_POST['action'] ?? '';
-
-    if ($action === 'toggle_status' && $id) {
-        $current = db()->prepare('SELECT status FROM contact_enquiries WHERE id = :id');
-        $current->execute(['id' => $id]);
-        $row = $current->fetch();
-        if ($row) {
-            $newStatus = $row['status'] === 'new' ? 'resolved' : 'new';
-            db()->prepare('UPDATE contact_enquiries SET status = :s WHERE id = :id')->execute(['s' => $newStatus, 'id' => $id]);
-            flash_success('Enquiry marked as ' . $newStatus . '.');
-        }
-    } elseif ($action === 'delete' && $id) {
-        db()->prepare('DELETE FROM contact_enquiries WHERE id = :id')->execute(['id' => $id]);
-        audit_log('enquiry.delete', "Deleted enquiry #$id");
-        flash_success('Enquiry deleted.');
-    }
-    redirect('/admin/enquiries.php');
-}
-
-$filter = $_GET['status'] ?? 'all';
-$sql = 'SELECT * FROM contact_enquiries';
-if ($filter === 'new' || $filter === 'resolved') {
-    $sql .= ' WHERE status = :status';
-}
-$sql .= ' ORDER BY created_at DESC';
-$stmt = db()->prepare($sql);
-if ($filter === 'new' || $filter === 'resolved') {
-    $stmt->execute(['status' => $filter]);
-} else {
-    $stmt->execute();
-}
-$enquiries = $stmt->fetchAll();
-
-require_once __DIR__ . '/includes/admin-header.php';
+require_once dirname(__DIR__).'/includes/bootstrap.php';define('CLUB_CONTACT_LIBRARY_ONLY',true);require_once dirname(__DIR__).'/contact.php';club_require_capability('enquiries.handle');$error='';
+if(($_SERVER['REQUEST_METHOD']??'GET')==='POST'){csrf_verify();try{if(($_POST['action']??'')!=='resolve')throw new InvalidArgumentException('Invalid enquiry action.');club_contact_resolve((int)($_POST['id']??0));flash_success('Enquiry marked resolved.');redirect('/admin/enquiries.php');}catch(Throwable $e){$error=$e->getMessage();}}
+$allowed=array_values(array_filter(['general','membership','hall_hire'],'club_contact_can_handle'));$filter=(string)($_GET['status']??(isset($_GET['id'])?'all':'new'));if(!in_array($filter,['all','new','resolved'],true))$filter='new';
+$enquiries=[];if($allowed){$sql='SELECT * FROM contact_enquiries WHERE category IN('.implode(',',array_fill(0,count($allowed),'?')).')';$params=$allowed;if($filter!=='all'){$sql.=' AND status=?';$params[]=$filter;}if(!empty($_GET['id'])){$sql.=' AND id=?';$params[]=(int)$_GET['id'];}$q=db()->prepare($sql.' ORDER BY created_at DESC LIMIT 100');$q->execute($params);$enquiries=$q->fetchAll();}
+club_member_layout_start('Club enquiries');flash_render();
 ?>
-
-<div class="admin-panel">
-    <div class="admin-panel__header">
-        <h2 style="margin:0;">Contact Enquiries</h2>
-        <div class="quick-actions" style="margin:0;">
-            <a class="btn btn--small <?= $filter === 'all' ? 'btn--primary' : 'btn--secondary' ?>" href="<?= site_url('/admin/enquiries.php') ?>">All</a>
-            <a class="btn btn--small <?= $filter === 'new' ? 'btn--primary' : 'btn--secondary' ?>" href="<?= site_url('/admin/enquiries.php?status=new') ?>">New</a>
-            <a class="btn btn--small <?= $filter === 'resolved' ? 'btn--primary' : 'btn--secondary' ?>" href="<?= site_url('/admin/enquiries.php?status=resolved') ?>">Resolved</a>
-        </div>
-    </div>
-
-    <?php if (empty($enquiries)): ?>
-        <p class="empty-state">No enquiries to show.</p>
-    <?php else: ?>
-    <div class="admin-table-wrap">
-        <table class="admin-table">
-            <thead><tr><th>Received</th><th>Name</th><th>Contact</th><th>Subject / Message</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody>
-            <?php foreach ($enquiries as $enq): ?>
-                <tr>
-                    <td><?= e(format_date($enq['created_at'], 'j M Y, g:ia')) ?></td>
-                    <td><?= e($enq['name']) ?></td>
-                    <td><a href="mailto:<?= e($enq['email']) ?>"><?= e($enq['email']) ?></a><?= $enq['phone'] ? '<br>' . e($enq['phone']) : '' ?></td>
-                    <td><strong><?= e($enq['subject'] ?: '(No subject)') ?></strong><br><?= e(truncate_text($enq['message'], 140)) ?></td>
-                    <td><span class="status-pill status-pill--<?= e($enq['status']) ?>"><?= e(ucfirst($enq['status'])) ?></span></td>
-                    <td class="admin-table__actions">
-                        <form method="post" class="confirm-inline">
-                            <?php csrf_field(); ?>
-                            <input type="hidden" name="id" value="<?= $enq['id'] ?>">
-                            <input type="hidden" name="action" value="toggle_status">
-                            <button type="submit" class="btn btn--small btn--secondary"><?= $enq['status'] === 'new' ? 'Mark Resolved' : 'Reopen' ?></button>
-                        </form>
-                        <form method="post" class="confirm-inline">
-                            <?php csrf_field(); ?>
-                            <input type="hidden" name="id" value="<?= $enq['id'] ?>">
-                            <input type="hidden" name="action" value="delete">
-                            <button type="submit" class="btn btn--small btn--danger" data-confirm="Permanently delete this enquiry?">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-    <?php endif; ?>
-</div>
-
-<?php require_once __DIR__ . '/includes/admin-footer.php'; ?>
+<p>Private messages from the contact form. Only enquiries assigned to your role are shown.</p><div class="hero__actions"><?php foreach(['new'=>'New','resolved'=>'Resolved','all'=>'All'] as $key=>$label): ?><a class="btn <?= $filter===$key?'btn--primary':'btn--secondary' ?>" href="?status=<?= $key ?>"><?= $label ?></a><?php endforeach ?></div><?php if($error): ?><p class="alert alert--error" role="alert"><?= e($error) ?></p><?php endif ?><?php if(!$enquiries): ?><div class="platform-panel empty-state"><h2>All clear</h2><p>No enquiries to show in this view.</p></div><?php endif ?>
+<?php foreach($enquiries as $enquiry): ?><article class="platform-panel"><span class="status-label"><?= e(ucfirst($enquiry['status'])) ?> · <?= e(str_replace('_',' ',$enquiry['category'])) ?></span><p class="text-muted"><?= e($enquiry['reference']?:'Enquiry #'.$enquiry['id']) ?> · <?= e(format_date($enquiry['created_at'],'j F Y H:i')) ?></p><h2><?= e($enquiry['subject']?:'Message from '.$enquiry['name']) ?></h2><p><strong><?= e($enquiry['name']) ?></strong><br><a href="mailto:<?= e($enquiry['email']) ?>"><?= e($enquiry['email']) ?></a><?= $enquiry['phone']?'<br>'.e($enquiry['phone']):'' ?></p><div class="enquiry-message"><?= nl2br(e($enquiry['message'])) ?></div><?php club_content_attachments('contact',(int)$enquiry['id']); ?><?php $q=db()->prepare('SELECT status,last_error FROM club_outbox WHERE event_key=?');$q->execute(['contact-notification-'.$enquiry['id']]);$delivery=$q->fetch(); ?><p class="text-muted">Email notification: <?= e($delivery?str_replace('_',' ',$delivery['status']):'not queued — message is saved here') ?><?= !empty($delivery['last_error'])?' · '.e($delivery['last_error']):'' ?></p><?php if($enquiry['status']==='new'): ?><form method="post"><?php csrf_field(); ?><input type="hidden" name="id" value="<?= (int)$enquiry['id'] ?>"><button class="btn btn--secondary" name="action" value="resolve">Mark resolved</button></form><?php endif ?></article><?php endforeach ?>
+<p class="text-muted">Showing up to 100 enquiries. Notifications link to this protected inbox; files are never attached to notification emails.</p>
+<?php club_member_layout_end(); ?>
