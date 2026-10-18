@@ -19,9 +19,9 @@ if (empty($locked) && $_SERVER['REQUEST_METHOD'] === 'POST') {
     catch (DomainException $e) { $error = $e->getMessage(); }
 }
 seo_set(['title'=>$id ? 'Edit my poll' : 'Suggest a poll']);
-require APP_ROOT . '/includes/header.php';
+club_member_layout_start($id ? 'Edit my poll' : 'Suggest a poll');
 ?>
-<section class="section"><div class="container member-layout"><a href="<?= e(site_url('/polls.php')) ?>">← Members’ polls</a><div class="platform-panel"><span class="eyebrow">Your club, your ideas</span><h1><?= $id ? 'Edit my poll' : 'Suggest a poll' ?></h1><p>Your poll will be reviewed by the committee before members can vote.</p>
+<a href="<?= e(site_url('/polls.php')) ?>">← Members’ polls</a><div class="platform-panel"><span class="eyebrow">Your club, your ideas</span><p>Your poll will be reviewed by the committee before members can vote.</p>
 <?php if ($error): ?><p class="alert alert--error" role="alert"><?= e($error) ?></p><?php endif; ?>
 <?php if (empty($locked)): ?><form method="post"><?php csrf_field(); ?>
 <div class="form-field"><label for="title">Your question</label><input id="title" name="title" maxlength="255" required value="<?= e($values['title']) ?>"></div>
@@ -29,5 +29,5 @@ require APP_ROOT . '/includes/header.php';
 <div class="form-field"><label for="choices">Answer choices — one per line</label><textarea id="choices" name="choices_text" required rows="5" aria-describedby="choices-help"><?= e(implode("\n",$values['choices'])) ?></textarea><p id="choices-help">Between two and ten different choices. Members choose one answer.</p></div>
 <div class="platform-grid"><div class="form-field"><label for="opens">Voting opens (UK time)</label><input id="opens" type="datetime-local" name="opens_at" required value="<?= e(str_replace(' ','T',substr($values['opens_at'],0,16))) ?>"></div><div class="form-field"><label for="closes">Voting closes (UK time)</label><input id="closes" type="datetime-local" name="closes_at" required value="<?= e(str_replace(' ','T',substr($values['closes_at'],0,16))) ?>"></div></div>
 <p>Members may change their vote until closing. Results appear afterwards. Questions and answers are locked after submission; ask the committee to return a poll for changes before publication.</p><div class="actions"><button class="btn btn--secondary" name="action" value="draft">Save draft</button><button class="btn btn--primary" name="action" value="submit">Submit for approval</button></div>
-</form><?php endif; ?></div></div></section>
-<?php require APP_ROOT . '/includes/footer.php'; ?>
+</form><?php endif; ?></div>
+<?php club_member_layout_end(); ?>

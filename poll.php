@@ -13,12 +13,12 @@ if ($poll && $_SERVER['REQUEST_METHOD'] === 'POST') {
     catch (DomainException $e) { $error = $e->getMessage(); }
 }
 seo_set(['title'=>$poll ? $poll['title'] : 'Poll unavailable']);
-require APP_ROOT . '/includes/header.php';
+club_member_layout_start($poll ? $poll['title'] : 'Poll unavailable');
 ?>
-<section class="section"><div class="container member-layout"><a href="<?= e(site_url('/polls.php')) ?>">← Members’ polls</a>
+<a href="<?= e(site_url('/polls.php')) ?>">← Members’ polls</a>
 <?php if ($error): ?><p class="alert alert--error" role="alert"><?= e($error) ?></p><?php endif; ?>
 <?php if ($poll): $state = club_poll_state($poll); $vote = club_poll_my_vote((int)$poll['id']); ?>
-<article class="platform-panel"><span class="eyebrow">Members only · <?= e(ucfirst($state)) ?></span><h1><?= e($poll['title']) ?></h1><p><?= nl2br(e($poll['description'])) ?></p>
+<article class="platform-panel"><span class="eyebrow">Members only · <?= e(ucfirst($state)) ?></span><p><?= nl2br(e($poll['description'])) ?></p>
 <p>Opens <?= e(format_date($poll['opens_at'],'j F Y, g:ia')) ?><br>Closes <?= e(format_date($poll['closes_at'],'j F Y, g:ia')) ?> · UK time</p>
 <?php if ($state === 'open' && club_can('polls.vote') && club_is_active_member()): ?>
 <form method="post"><?php csrf_field(); ?><fieldset><legend>Choose one answer</legend>
@@ -33,5 +33,5 @@ require APP_ROOT . '/includes/header.php';
 <?php if ($poll['reviewer_note'] && ((int)$poll['author_user_id'] === (int)club_current_user()['id'] || club_can('content.publish'))): ?><p>Committee note: <?= e($poll['reviewer_note']) ?></p><?php endif; ?>
 <?php if ((int)$poll['author_user_id'] === (int)club_current_user()['id'] && in_array($poll['status'],['draft','rejected'],true)): ?><a class="btn btn--secondary" href="<?= e(site_url('/members/poll-edit.php?id='.$poll['id'])) ?>">Edit my poll</a><?php endif; ?>
 <p>These are informal club opinion polls. Individual votes are stored privately to enforce one vote per member; committee screens show only results after closing.</p></article>
-<?php endif; ?></div></section>
-<?php require APP_ROOT . '/includes/footer.php'; ?>
+<?php endif; ?>
+<?php club_member_layout_end(); ?>
