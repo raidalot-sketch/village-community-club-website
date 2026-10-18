@@ -101,12 +101,13 @@ p { max-width: 70ch; }
 .rich-content > h2:first-child { margin-top: 0; }
 .rich-content .btn { margin-top: 24px; }
 .rich-content blockquote { border-left-width: 1px; }
-.site-footer { background: var(--color-primary-dark); color: #e4ddca; padding-top: 52px; }
+.site-footer { background: var(--color-primary-dark); color: #e4ddca; padding-top: 36px; }
 .site-footer__heading { color: #efdfaa; font-size: 1.05rem; }
 .site-footer p, .site-footer address, .site-footer li { font-size: .8rem; }
 .site-footer a { color: #e4ddca; overflow-wrap: anywhere; }
 .site-footer a:hover { color: #fff8e4; }
-.site-footer__grid { gap: 36px; }
+.site-footer__grid { gap: 28px; padding-bottom: 28px; }
+.footer-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 16px; }
 .site-footer__bottom { border-top-color: #4a473d; }
 .site-footer__bottom p { max-width: none; }
 .footer-links a, .footer-legal a, .social-links a { display: inline-block; padding-block: 6px; }

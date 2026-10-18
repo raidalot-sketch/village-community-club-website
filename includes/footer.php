@@ -22,16 +22,12 @@
         <div class="site-footer__col">
             <h2 class="site-footer__heading">Useful links</h2>
             <ul class="footer-links">
+                <li><a href="<?= site_url('/calendar.php') ?>">What’s on</a></li>
                 <li><a href="<?= site_url('/hall-hire.php') ?>">Hall hire</a></li>
-                <li><a href="<?= site_url('/about.php') ?>">About the Club</a></li>
-                <li><a href="<?= site_url('/facilities.php') ?>">Facilities &amp; activities</a></li>
+                <li><a href="<?= site_url('/membership.php') ?>">Membership</a></li>
                 <li><a href="<?= site_url('/news.php') ?>">Club news</a></li>
                 <li><a href="<?= site_url('/gallery.php') ?>">Photographs</a></li>
-                <li><a href="<?= site_url('/membership.php') ?>">Membership</a></li>
-                <li><a href="<?= site_url('/newsletters.php') ?>">Newsletters</a></li>
-                <li><a href="<?= site_url('/social.php') ?>">Facebook & Instagram</a></li>
-                <li><a href="<?= site_url('/committee.php') ?>">Committee</a></li>
-                <li><a href="<?= site_url('/contact.php') ?>">Contact Us</a></li>
+                <li><a href="<?= site_url('/contact.php') ?>">Contact</a></li>
             </ul>
         </div>
 
