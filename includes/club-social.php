@@ -20,7 +20,7 @@ function club_social_connection_probe(bool $check=false, ?callable $transport=nu
     $configuration=club_social_configuration();
     $result=['configuration'=>$configuration,'checked'=>false,'page'=>'not_checked','instagram'=>$configuration['instagram_id_configured']?'not_checked':'not_configured','publishing_permissions'=>'not_verified','message'=>'No network check requested.'];
     if(!$check)return $result;
-    if(PHP_SAPI!=='cli')throw new DomainException('Social connection checks are a command line operation.');
+    if(PHP_SAPI!=='cli'&&!club_can('settings.manage'))throw new DomainException('Administrator permission is required to check social connections.');
     if(!$configuration['read_probe_configured']){$result['page']='configuration_required';$result['message']='Add a valid Page ID, private Page token and Graph version before checking the connection.';return $result;}
     try {
         // A GET only: never create media, posts, publish requests, subscriptions or permissions.
