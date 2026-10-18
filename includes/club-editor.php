@@ -18,6 +18,35 @@ function club_editor_validate(int $id,string $token,?int $postId):array {
     if($postId){$post=club_community_record('post',$postId);if(!$post||!club_content_editable($post))throw new RuntimeException('You cannot edit this post.');}
     return $s;
 }
+/** Only the most recent proposed revision can be resumed, including returned changes. */
+function club_editor_revision(?int $postId):?array {
+    if(!$postId)return null;
+    $q=db()->prepare("SELECT * FROM club_revisions WHERE owner_type='post' AND owner_id=? ORDER BY id DESC LIMIT 1".(db()->inTransaction()?' FOR UPDATE':''));$q->execute([$postId]);$revision=$q->fetch();
+    return $revision&&in_array($revision['status'],['submitted','rejected'],true)?$revision:null;
+}
+/** Excludes staging so uploading a photograph does not invalidate this editor's version. */
+function club_editor_version(?int $postId):string {
+    if(!$postId)return hash('sha256','new-post');
+    $lock=db()->inTransaction()?' FOR UPDATE':'';
+    $q=db()->prepare('SELECT * FROM club_posts WHERE id=?'.$lock);$q->execute([$postId]);$post=$q->fetch();
+    $q=db()->prepare("SELECT * FROM club_revisions WHERE owner_type='post' AND owner_id=? ORDER BY id DESC LIMIT 1".$lock);$q->execute([$postId]);$revision=$q->fetch();
+    $q=db()->prepare("SELECT * FROM club_attachments WHERE (owner_type='post' AND owner_id=?) OR (owner_type='revision' AND owner_id=?) ORDER BY id".$lock);$q->execute([$postId,$revision['id']??0]);
+    return hash('sha256',json_encode([$post,$revision,$q->fetchAll()],JSON_THROW_ON_ERROR));
+}
+/** Validate the explicit retained shelf against this editor's complete accessible media. */
+function club_editor_keep(array $input,array $media):array {
+    $ids=array_map('intval',array_column($media,'id'));
+    if(empty($input['editor_media_present']))return $ids;
+    $keep=$input['keep_attachment_ids']??[];if(!is_array($keep))throw new InvalidArgumentException('Choose valid post attachments.');
+    foreach($keep as $id)if(!is_scalar($id)||!ctype_digit((string)$id)||(int)$id<1)throw new InvalidArgumentException('Choose valid post attachments.');
+    $keep=array_values(array_unique(array_map('intval',$keep)));
+    if(array_diff($keep,$ids))throw new InvalidArgumentException('Choose attachments belonging to this post editor.');
+    return $keep;
+}
+function club_editor_archive_omitted(string $ownerType,int $ownerId,array $keep):void {
+    $q=db()->prepare('SELECT id FROM club_attachments WHERE owner_type=? AND owner_id=?');$q->execute([$ownerType,$ownerId]);
+    foreach($q->fetchAll() as $a)if(!in_array((int)$a['id'],$keep,true))db()->prepare('UPDATE club_attachments SET owner_type=? WHERE id=? AND owner_type=? AND owner_id=?')->execute([$ownerType.'_removed',$a['id'],$ownerType,$ownerId]);
+}
 function club_editor_media(array $session):array {
     if(!array_key_exists('user_id',$session)){
         $q=db()->prepare('SELECT post_id FROM club_editor_sessions WHERE id=?');$q->execute([(int)($session['id']??0)]);$postId=$q->fetchColumn();
@@ -25,14 +54,16 @@ function club_editor_media(array $session):array {
     }
     $user=club_editor_require_author();
     if((int)$session['user_id']!==(int)$user['id'])throw new RuntimeException('This editor session is not authorised.');
-    $params=[(int)$session['id']];$where="(owner_type='editor' AND owner_id=?)";
+    $removed=[];$params=[(int)$session['id']];$where="(owner_type='editor' AND owner_id=?)";
     if(!empty($session['post_id'])){
         $post=club_community_record('post',(int)$session['post_id']);if(!$post||!club_content_editable($post))throw new RuntimeException('You cannot edit this post.');
-        $where.=" OR (owner_type='post' AND owner_id=?) OR (owner_type='revision' AND owner_id=(SELECT id FROM club_revisions WHERE owner_type='post' AND owner_id=? AND status='submitted' ORDER BY id DESC LIMIT 1))";
-        $params[]=(int)$session['post_id'];$params[]=(int)$session['post_id'];
+        $revision=$post['status']==='published'?club_editor_revision((int)$session['post_id']):null;
+        $removed=$revision?array_map('intval',json_decode($revision['payload'],true)['removed_attachment_ids']??[]):[];
+        $where.=" OR (owner_type='post' AND owner_id=?) OR (owner_type='revision' AND owner_id=?)";
+        $params[]=(int)$session['post_id'];$params[]=(int)($revision['id']??0);
     }
-    $q=db()->prepare('SELECT id,original_name,mime,bytes FROM club_attachments WHERE '.$where.' ORDER BY id');$q->execute($params);
-    return array_map(fn($a)=>['id'=>(int)$a['id'],'url'=>club_media_url((int)$a['id']),'name'=>$a['original_name'],'mime'=>$a['mime'],'bytes'=>(int)$a['bytes']],$q->fetchAll());
+    $q=db()->prepare('SELECT id,original_name,mime,bytes FROM club_attachments WHERE '.$where.' ORDER BY id'.(db()->inTransaction()?' FOR UPDATE':''));$q->execute($params);
+    return array_map(fn($a)=>['id'=>(int)$a['id'],'url'=>club_media_url((int)$a['id']),'name'=>$a['original_name'],'mime'=>$a['mime'],'bytes'=>(int)$a['bytes']],array_values(array_filter($q->fetchAll(),fn($a)=>!in_array((int)$a['id'],$removed,true))));
 }
 function club_editor_image_id(string $url):?int {
     // Only the exact protected media route on this site's origin is eligible.
@@ -83,16 +114,14 @@ function club_editor_render(array $post):string {
     $ids=array_map('intval',array_column(array_filter(club_attachment_list('post',(int)$post['id']),fn($a)=>str_starts_with($a['mime'],'image/')),'id'));
     return club_editor_sanitize($post['content'],$ids,false);
 }
-/** Move only referenced staged photos; retain saved attachments for existing galleries. */
-function club_editor_attach(array $session,array $payload,string $ownerType,int $ownerId):void {
-    $ids=club_editor_inline_ids($payload['content']);if(!empty($payload['cover_attachment_id']))$ids[]=(int)$payload['cover_attachment_id'];
-    foreach(array_unique($ids) as $id)db()->prepare("UPDATE club_attachments SET owner_type=?,owner_id=? WHERE id=? AND owner_type='editor' AND owner_id=? AND user_id=?")->execute([$ownerType,$ownerId,$id,$session['id'],$session['user_id']]);
-    club_editor_attachment_limit($ownerType,$ownerId,!empty($session['post_id'])?(int)$session['post_id']:null);
+/** Reconcile an explicit shelf, preserving every retained staged photo, placed or unplaced. */
+function club_editor_attach(array $session,array $payload,string $ownerType,int $ownerId,array $keep):void {
+    club_editor_archive_omitted('editor',(int)$session['id'],$keep);
+    club_editor_archive_omitted($ownerType,$ownerId,$keep);
+    foreach($keep as $id)db()->prepare("UPDATE club_attachments SET owner_type=?,owner_id=? WHERE id=? AND owner_type='editor' AND owner_id=? AND user_id=?")->execute([$ownerType,$ownerId,$id,$session['id'],$session['user_id']]);
 }
-function club_editor_attachment_limit(string $ownerType,int $ownerId,?int $postId=null):void {
-    $q=db()->prepare('SELECT COUNT(*) FROM club_attachments WHERE owner_type=? AND owner_id=?');$q->execute([$ownerType,$ownerId]);
-    // Published originals are also accessible in a pending revision and count toward its cap.
-    $count=(int)$q->fetchColumn();
-    if($ownerType==='revision'&&$postId){$q=db()->prepare("SELECT COUNT(*) FROM club_attachments WHERE owner_type='post' AND owner_id=?");$q->execute([$postId]);$count+=(int)$q->fetchColumn();}
-    if($count>3)throw new InvalidArgumentException('A post can have up to three attachments.');
+function club_editor_attachment_limit(string $ownerType,int $ownerId,?int $postId=null,array $removed=[]):void {
+    $q=db()->prepare('SELECT id FROM club_attachments WHERE owner_type=? AND owner_id=?');$q->execute([$ownerType,$ownerId]);$ids=array_map('intval',$q->fetchAll(PDO::FETCH_COLUMN));
+    if($ownerType==='revision'&&$postId){$q=db()->prepare("SELECT id FROM club_attachments WHERE owner_type='post' AND owner_id=?");$q->execute([$postId]);$ids=array_merge($ids,array_diff(array_map('intval',$q->fetchAll(PDO::FETCH_COLUMN)),$removed));}
+    if(count(array_unique($ids))>3)throw new InvalidArgumentException('A post can have up to three attachments.');
 }

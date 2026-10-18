@@ -50,12 +50,12 @@ function club_content_payload(string $kind,array $input,array $editorMediaIds=[]
 /** Returns the affected record plus upload owner (a pending revision is kept private). */
 function club_content_save(string $kind,?int $id,array $input,bool $submit,array $files=[]):array {
     $user=club_current_user(); if(!$user || (!club_can('content.submit')&&!club_can('content.publish'))) throw new RuntimeException('An active membership is required to submit content.');
-    $table=club_community_table($kind); $editorSession=null;$editorIds=[];
+    $table=club_community_table($kind); $editorSession=null;$editorIds=[];$editorKeep=[];
     if($kind==='post'&&($input['content_format']??'')==='html'){
         $editorSession=club_editor_validate((int)($input['editor_session_id']??0),(string)($input['editor_session_token']??''),$id);
         $editorIds=array_map('intval',array_column(array_filter(club_editor_media($editorSession),fn($a)=>str_starts_with($a['mime'],'image/')),'id'));
     }
-    $payload=club_content_payload($kind,$input,$editorIds); $pdo=db(); $ownsTransaction=!$pdo->inTransaction(); if($ownsTransaction)$pdo->beginTransaction();else $pdo->exec('SAVEPOINT community_work');
+    $payload=$editorSession?[]:club_content_payload($kind,$input,$editorIds); $pdo=db(); $ownsTransaction=!$pdo->inTransaction(); if($ownsTransaction)$pdo->beginTransaction();else $pdo->exec('SAVEPOINT community_work');
     try {
         if($editorSession){
             $lock=$pdo->prepare('SELECT id FROM club_editor_sessions WHERE id=? FOR UPDATE');$lock->execute([$editorSession['id']]);
@@ -64,21 +64,24 @@ function club_content_save(string $kind,?int $id,array $input,bool $submit,array
         $row=null;
         if($id){$s=$pdo->prepare("SELECT * FROM $table WHERE id=? FOR UPDATE");$s->execute([$id]);$row=$s->fetch();if(!$row || ($kind==='event'&&$row['deleted_at']) || !club_content_editable($row))throw new RuntimeException('You cannot edit this item.');}
         if($editorSession){
-            $editorIds=array_map('intval',array_column(array_filter(club_editor_media($editorSession),fn($a)=>str_starts_with($a['mime'],'image/')),'id'));
+            if(!isset($input['editor_version'])||!is_string($input['editor_version'])||!hash_equals(club_editor_version($id),$input['editor_version']))throw new RuntimeException('This article changed in another tab. Reload it before saving. Your current text is still here.');
+            $editorMedia=club_editor_media($editorSession);$editorKeep=club_editor_keep($input,$editorMedia);
+            $editorIds=array_map('intval',array_column(array_filter($editorMedia,fn($a)=>str_starts_with($a['mime'],'image/')&&in_array((int)$a['id'],$editorKeep,true)),'id'));
             $payload=club_content_payload($kind,$input,$editorIds);
         }
         if($kind==='event' && $payload['visibility']==='members' && !empty($row['featured_image']))throw new InvalidArgumentException('This older event uses a public photograph. Ask an administrator to move it to protected attachments before choosing members only.');
         if($row && $row['status']==='published'){
             // Published copies remain intact until an explicit approval. Editing published content submits a revision.
-            $s=$pdo->prepare("SELECT id FROM club_revisions WHERE owner_type=? AND owner_id=? AND status='submitted' ORDER BY id DESC LIMIT 1 FOR UPDATE");$s->execute([$kind,$id]);$revision=$s->fetchColumn();
-            if($revision)$pdo->prepare("UPDATE club_revisions SET status='rejected',reviewer_note='Superseded by a newer revision.' WHERE id=?")->execute([$revision]);
+            if($kind==='post'){$prior=club_editor_revision($id);$revision=$prior['id']??null;}else{$s=$pdo->prepare("SELECT * FROM club_revisions WHERE owner_type=? AND owner_id=? AND status='submitted' ORDER BY id DESC LIMIT 1 FOR UPDATE");$s->execute([$kind,$id]);$prior=$s->fetch();$revision=$prior['id']??null;}
+            if($revision&&$prior['status']==='submitted')$pdo->prepare("UPDATE club_revisions SET status='rejected',reviewer_note='Superseded by a newer revision.' WHERE id=?")->execute([$revision]);
+            if($editorSession)$payload['removed_attachment_ids']=array_values(array_diff(array_map('intval',array_column(club_attachment_list('post',$id),'id')),$editorKeep));
             $pdo->prepare('INSERT INTO club_revisions(owner_type,owner_id,author_user_id,payload) VALUES(?,?,?,?)')->execute([$kind,$id,$user['id'],json_encode($payload,JSON_THROW_ON_ERROR)]);$newRevision=(int)$pdo->lastInsertId();if($revision)$pdo->prepare("UPDATE club_attachments SET owner_id=? WHERE owner_type='revision' AND owner_id=?")->execute([$newRevision,$revision]);$revision=$newRevision;
-            if(!empty($files['name']))club_store_uploads($files,'revision',(int)$revision,(int)$user['id']);if($editorSession)club_editor_attach($editorSession,$payload,'revision',(int)$revision);if($kind==='post')club_editor_attachment_limit('revision',(int)$revision,$id);club_content_audit('revision.submitted',$kind,$id);if($ownsTransaction)$pdo->commit();else $pdo->exec('RELEASE SAVEPOINT community_work');return ['id'=>$id,'owner_type'=>'revision','owner_id'=>(int)$revision,'status'=>'submitted'];
+            if($editorSession)club_editor_attach($editorSession,$payload,'revision',(int)$revision,$editorKeep);if(!empty($files['name']))club_store_uploads($files,'revision',(int)$revision,(int)$user['id']);if($kind==='post')club_editor_attachment_limit('revision',(int)$revision,$id,$payload['removed_attachment_ids']??[]);club_content_audit('revision.submitted',$kind,$id);if($ownsTransaction)$pdo->commit();else $pdo->exec('RELEASE SAVEPOINT community_work');return ['id'=>$id,'owner_type'=>'revision','owner_id'=>(int)$revision,'status'=>'submitted'];
         }
         $payload['status']=$submit?'submitted':'draft';
         if($row){$assign=implode(',',array_map(fn($key)=>"$key=?",array_keys($payload)));$pdo->prepare("UPDATE $table SET $assign,reviewer_note=NULL WHERE id=?")->execute([...array_values($payload),$id]);}
         else{$payload['author_user_id']=$user['id'];$payload['slug']=unique_slug($table,slugify($payload['title']));$columns=implode(',',array_keys($payload));$marks=implode(',',array_fill(0,count($payload),'?'));$pdo->prepare("INSERT INTO $table ($columns) VALUES ($marks)")->execute(array_values($payload));$id=(int)$pdo->lastInsertId();}
-        if(!empty($files['name']))club_store_uploads($files,$kind,$id,(int)$user['id']);if($editorSession){club_editor_attach($editorSession,$payload,$kind,$id);if($editorSession['post_id']===null)$pdo->prepare('UPDATE club_editor_sessions SET post_id=? WHERE id=?')->execute([$id,$editorSession['id']]);}club_content_audit($submit?'submitted':'draft.saved',$kind,$id);if($ownsTransaction)$pdo->commit();else $pdo->exec('RELEASE SAVEPOINT community_work');return ['id'=>$id,'owner_type'=>$kind,'owner_id'=>$id,'status'=>$payload['status']];
+        if($editorSession){club_editor_attach($editorSession,$payload,$kind,$id,$editorKeep);if($editorSession['post_id']===null)$pdo->prepare('UPDATE club_editor_sessions SET post_id=? WHERE id=?')->execute([$id,$editorSession['id']]);}if(!empty($files['name']))club_store_uploads($files,$kind,$id,(int)$user['id']);if($kind==='post')club_editor_attachment_limit('post',$id);club_content_audit($submit?'submitted':'draft.saved',$kind,$id);if($ownsTransaction)$pdo->commit();else $pdo->exec('RELEASE SAVEPOINT community_work');return ['id'=>$id,'owner_type'=>$kind,'owner_id'=>$id,'status'=>$payload['status']];
     }catch(Throwable $e){if($pdo->inTransaction()){if($ownsTransaction)$pdo->rollBack();else{$pdo->exec('ROLLBACK TO SAVEPOINT community_work');$pdo->exec('RELEASE SAVEPOINT community_work');}}throw $e;}
 }
 /** Fingerprint exactly the text and attachments the publisher reviewed. */
@@ -99,7 +102,13 @@ function club_content_moderate(string $kind,int $id,string $action,string $note=
             $s=$pdo->prepare("SELECT * FROM club_revisions WHERE id=? AND owner_type=? AND owner_id=? AND status='submitted' FOR UPDATE");$s->execute([$revisionId,$kind,$id]);$revision=$s->fetch();if(!$revision||$row['status']!=='published')throw new RuntimeException('This revision is no longer awaiting review.');
             if(!in_array($action,['approve','reject'],true))throw new InvalidArgumentException('Invalid revision decision.');
             if($action==='approve'){
-                $payload=json_decode($revision['payload'],true,512,JSON_THROW_ON_ERROR);$allowed=$kind==='post'?['title','content','summary','cover_attachment_id']:['title','description','event_date','end_date','start_time','end_time','venue','booking_link','visibility','recurrence','recurrence_end_date'];$payload=array_intersect_key($payload,array_flip($allowed));
+                $payload=json_decode($revision['payload'],true,512,JSON_THROW_ON_ERROR);
+                if($kind==='post'){
+                    $removed=array_map('intval',$payload['removed_attachment_ids']??[]);
+                    foreach($removed as $attachmentId)$pdo->prepare("UPDATE club_attachments SET owner_type='post_removed' WHERE id=? AND owner_type='post' AND owner_id=?")->execute([$attachmentId,$id]);
+                    club_editor_attachment_limit('revision',$revisionId,$id);
+                }
+                $allowed=$kind==='post'?['title','content','summary','cover_attachment_id']:['title','description','event_date','end_date','start_time','end_time','venue','booking_link','visibility','recurrence','recurrence_end_date'];$payload=array_intersect_key($payload,array_flip($allowed));
                 if($kind==='event'&&($payload['visibility']??$row['visibility'])==='members'&&!empty($row['featured_image']))throw new InvalidArgumentException('Move the legacy public photograph to protected storage before approving a members-only event.');
                 $assign=implode(',',array_map(fn($key)=>"$key=?",array_keys($payload)));$pdo->prepare("UPDATE $table SET $assign WHERE id=?")->execute([...array_values($payload),$id]);
                 $pdo->prepare("UPDATE club_attachments SET owner_type=?,owner_id=? WHERE owner_type='revision' AND owner_id=?")->execute([$kind,$id,$revisionId]);

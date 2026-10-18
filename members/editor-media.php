@@ -10,7 +10,9 @@ try {
     foreach($incoming as $file){$mime=is_file($file['tmp_name'])?(new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']):'';if(!in_array($mime,['image/jpeg','image/png','image/webp'],true))throw new InvalidArgumentException('Choose a JPEG, PNG or WebP photograph.');}
     db()->beginTransaction();$q=db()->prepare('SELECT id FROM club_editor_sessions WHERE id=? FOR UPDATE');$q->execute([$session['id']]);
     if(!empty($session['post_id'])){$q=db()->prepare('SELECT id FROM club_posts WHERE id=? FOR UPDATE');$q->execute([$session['post_id']]);}
-    if(count(club_editor_media($session))+count($incoming)>3)throw new InvalidArgumentException('A post can have up to three attachments.');
+    $keep=club_editor_keep($_POST,club_editor_media($session));
+    if(count($keep)+count($incoming)>3)throw new InvalidArgumentException('A post can have up to three attachments.');
+    club_editor_archive_omitted('editor',(int)$session['id'],$keep);
     $ids=club_store_uploads($files,'editor',(int)$session['id'],(int)$session['user_id']);$media=array_values(array_filter(club_editor_media($session),fn($a)=>in_array($a['id'],$ids,true)));
     db()->commit();echo json_encode(['media'=>$media],JSON_THROW_ON_ERROR);
 }catch(Throwable $e){if(db()->inTransaction())db()->rollBack();if(http_response_code()<400)http_response_code($e instanceof InvalidArgumentException?400:403);echo json_encode(['error'=>$e instanceof PDOException?'The photographs could not be saved. Try again.':$e->getMessage()],JSON_THROW_ON_ERROR);}
