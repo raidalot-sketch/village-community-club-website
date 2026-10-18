@@ -72,7 +72,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-if (defined('FORCE_HTTPS') && FORCE_HTTPS && (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on')) {
+if (PHP_SAPI !== 'cli' && defined('FORCE_HTTPS') && FORCE_HTTPS && (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on')) {
     $redirectUrl = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
     header('Location: ' . $redirectUrl, true, 301);
     exit;
