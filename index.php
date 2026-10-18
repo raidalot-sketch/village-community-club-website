@@ -2,7 +2,7 @@
 require_once __DIR__ . '/includes/bootstrap.php';
 seo_set(['title' => 'Welcome', 'description' => get_setting('site_tagline'), 'image' => site_image_url('hero_image_path', 'images/club-building.jpg')]);
 seo_add_schema(schema_organization());
-$events = db()->query("SELECT * FROM events WHERE status='published' AND deleted_at IS NULL AND event_date >= CURDATE() ORDER BY event_date, start_time LIMIT 3")->fetchAll();
+$events = db()->query("SELECT * FROM events WHERE status='published' AND visibility='public' AND deleted_at IS NULL AND event_date >= CURDATE() ORDER BY event_date, start_time LIMIT 3")->fetchAll();
 $news = db()->query("SELECT * FROM news_articles WHERE status='published' AND deleted_at IS NULL ORDER BY published_at DESC LIMIT 3")->fetchAll();
 require_once __DIR__ . '/includes/header.php';
 ?>

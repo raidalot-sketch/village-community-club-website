@@ -47,7 +47,7 @@ define('SESSION_IDLE_TIMEOUT_MINUTES', 20);
 // ---------------------------------------------------------------------
 // 'mail'  = use PHP's built-in mail() function (works on most cPanel hosts)
 // 'smtp'  = use the SMTP settings below (recommended if mail() is unreliable)
-define('MAIL_METHOD', 'mail');
+define('MAIL_METHOD', 'disabled'); // Enable only after delivery is configured and tested.
 
 define('MAIL_FROM_ADDRESS', 'noreply@example.com');
 define('MAIL_FROM_NAME', SITE_NAME);
@@ -62,8 +62,8 @@ define('SMTP_ENCRYPTION', 'tls'); // 'tls' or 'ssl'
 // ---------------------------------------------------------------------
 // Uploads
 // ---------------------------------------------------------------------
-define('MAX_UPLOAD_IMAGE_BYTES', 5 * 1024 * 1024);   // 5 MB per image
-define('MAX_UPLOAD_PDF_BYTES', 15 * 1024 * 1024);    // 15 MB per PDF
+define('MAX_UPLOAD_IMAGE_BYTES', 30 * 1024 * 1024);  // original photo; resized before storage
+define('MAX_UPLOAD_PDF_BYTES', 30 * 1024 * 1024);
 define('MAX_UPLOAD_VIDEO_BYTES', 30 * 1024 * 1024);  // 30 MB per video (if enabled)
 define('ALLOW_VIDEO_UPLOADS', false); // most shared hosts prefer YouTube/Vimeo embeds instead
 

@@ -85,7 +85,7 @@ header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
-header("Content-Security-Policy: default-src 'self'; img-src 'self' data: https:; media-src 'self' https:; style-src 'self' 'unsafe-inline'; script-src 'self' https://www.youtube.com https://player.vimeo.com; frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://www.google.com; font-src 'self'");
+header("Content-Security-Policy: default-src 'self'; img-src 'self' data: blob: https:; media-src 'self' https:; style-src 'self' 'unsafe-inline'; script-src 'self' https://www.youtube.com https://player.vimeo.com; frame-src https://www.facebook.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.google.com; worker-src 'self' blob:; font-src 'self'");
 
 // ---------------------------------------------------------------------
 // Shared helper libraries
@@ -112,3 +112,5 @@ if (!empty($_SESSION['admin_id'])) {
     }
     $_SESSION['last_activity'] = time();
 }
+
+require_once APP_ROOT . '/includes/club.php';

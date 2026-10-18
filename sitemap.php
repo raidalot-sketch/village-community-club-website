@@ -25,7 +25,7 @@ foreach ($news as $n) {
     $urls[] = ['loc' => site_url('/news-detail.php?slug=' . urlencode($n['slug'])), 'lastmod' => $n['updated_at'], 'priority' => '0.6'];
 }
 
-$events = db()->query("SELECT slug, updated_at FROM events WHERE status='published' AND deleted_at IS NULL")->fetchAll();
+$events = db()->query("SELECT slug, updated_at FROM events WHERE status='published' AND visibility='public' AND deleted_at IS NULL")->fetchAll();
 foreach ($events as $ev) {
     $urls[] = ['loc' => site_url('/event-detail.php?slug=' . urlencode($ev['slug'])), 'lastmod' => $ev['updated_at'], 'priority' => '0.6'];
 }

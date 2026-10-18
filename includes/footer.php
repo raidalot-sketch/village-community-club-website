@@ -60,5 +60,7 @@
 </footer>
 
 <script src="<?= asset_url('js/main.js') ?>" defer></script>
+<script src="<?= asset_url('vendor/heic2any/heic2any.min.js') ?>" defer></script>
+<script src="<?= asset_url('js/club-uploads.js') ?>" defer></script>
 </body>
 </html>

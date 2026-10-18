@@ -7,6 +7,7 @@
 <link rel="icon" type="image/jpeg" href="<?= asset_url('images/club-logo.jpg') ?>">
 <link rel="stylesheet" href="<?= asset_url('css/style.css') ?>">
 <link rel="stylesheet" href="<?= asset_url('css/nettlebed.css') ?>">
+<link rel="stylesheet" href="<?= asset_url('css/club-platform.css') ?>">
 </head>
 <body>
 <?php if ((defined('APP_ENV') && APP_ENV !== 'production') || (defined('SITE_PREVIEW') && SITE_PREVIEW)): ?><div class="preview-notice">Website preview · Club details are being prepared for launch</div><?php endif; ?>

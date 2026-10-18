@@ -1,4 +1,4 @@
-# Real credentials — never commit
+# Real credentials â€” never commit
 config/config.php
 
 # Runtime logs
@@ -23,3 +23,7 @@ Thumbs.db
 
 # Local installer lock artifacts
 config/installed.lock
+
+# Private club records and test artefacts
+private-storage/
+.user.ini

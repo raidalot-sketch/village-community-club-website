@@ -9,6 +9,7 @@ Options +FollowSymLinks
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteRule ^(?:config|database|docs|documentation|tests|private-storage)(?:/|$) - [F,L]
 
     # Force www-less or www — leave as-is; configure at DNS/cPanel level instead
     # of here, to avoid conflicting with the host's own redirect rules.
@@ -22,13 +23,6 @@ Options +FollowSymLinks
 <FilesMatch "\.(sql|log|md|env|ini|bak|sh)$">
     Require all denied
 </FilesMatch>
-
-# Config folder holds database credentials — never serve it directly
-<IfModule mod_authz_core.c>
-    <Directory "config">
-        Require all denied
-    </Directory>
-</IfModule>
 
 # Custom, non-technical error pages
 ErrorDocument 404 /404.php
