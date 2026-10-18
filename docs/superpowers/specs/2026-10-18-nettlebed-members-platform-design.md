@@ -79,7 +79,7 @@ Fields: name, email, optional phone, enquiry type (general, membership, hall hir
 
 Enquiries are stored privately, with a reference, category, created time, assignment, status and notification-delivery state. Access is scoped: Administrators can triage all enquiries; the Treasurer can handle membership/payment enquiries; other committee users receive explicit category assignments. Publisher status alone does not grant access to private correspondence. Add a narrowly scoped enquiry-handler capability/category assignment when a recipient needs dashboard access, without granting site administration. Member accounts see only their own submissions where an account history is offered; visitors do not gain an inbox.
 
-Confirmed correction: accept original phone photographs up to 30 MB each and automatically resize/compress them, following the existing Motors/Invoice image-handling approach. Do not reject a valid photo merely because its original size exceeds 5 MB. The previous proposed 5 MB photo cap is withdrawn. Confirmed: at most three attachments total per enquiry, counting photographs and documents together. PDFs are confirmed supported document attachments and are not resized/re-encoded as photographs. Keep their original document contents intact. The user also requested other document types; the exact additional allow-list and document byte limit remain to be confirmed, rather than accepting arbitrary file types. Validate content type, input byte size and image structure on the server; reject executable files, SVG, HTML and archives. Use random stored filenames and keep original display names sanitised. Store files outside the public document root or behind an authenticated authorised download handler. Public upload URLs and email links must not bypass the enquiry’s access rules. Scan attachments when a supported scanner is available and keep a clear operational record if no scanner is configured; do not claim files are virus-free.
+Confirmed correction: accept original phone photographs up to 30 MB each and automatically resize/compress them, following the existing Motors/Invoice image-handling approach. Do not reject a valid photo merely because its original size exceeds 5 MB. The previous proposed 5 MB photo cap is withdrawn. Confirmed: at most three attachments total per enquiry, counting photographs and documents together. PDFs are confirmed supported document attachments and are not resized/re-encoded as photographs. Keep their original document contents intact. Confirmed additional document formats: Word and Excel. The initial allow-list includes modern .docx and .xlsx documents with MIME/container validation; legacy .doc/.xls and macro-enabled formats require explicit implementation review rather than arbitrary acceptance. The document byte limit remains to be confirmed, separately from the confirmed 30 MB photo-original limit. Validate content type, input byte size and image structure on the server; reject executable files, SVG, HTML and archives. Use random stored filenames and keep original display names sanitised. Store files outside the public document root or behind an authenticated authorised download handler. Public upload URLs and email links must not bypass the enquiry’s access rules. Scan attachments when a supported scanner is available and keep a clear operational record if no scanner is configured; do not claim files are virus-free.
 
 Notification emails contain the enquiry reference, type and a link to the protected enquiry view. Do not automatically attach untrusted visitor files to committee emails. Routing to a committee mailbox does not grant website access; any necessary handler role is assigned separately. Staff replies use the configured club sender; validate reply-to addresses and guard against mail-header injection.
 
@@ -170,10 +170,29 @@ These are configuration/release dependencies rather than permission to invent va
 - Confirmed club bank details, treasurer identity and an existing/new club organisation in Invoice.
 - Reminder timing, sender and membership/import details.
 - Category-specific committee email destinations and handler assignments; general/default enquiries go to the confirmed club Gmail address.
-- Contact-enquiry retention, exact additional document formats and the document size limit. Three total attachments, photo previews, originals up to 30 MB with automatic resizing/compression, and retaining only the successfully optimised photo are confirmed. PDF support is confirmed.
+- Contact-enquiry retention, legacy/macro document support and the document size limit. Three total attachments, photo previews, originals up to 30 MB with automatic resizing/compression, and retaining only the successfully optimised photo are confirmed. PDF support is confirmed.
 - Instagram username/account type and authorised Facebook/Instagram account administrator.
 - Whether hall-booking management is wanted later; it is outside this calendar scope.
 
 ## Review record
 
 The user approved the role model in chat: submissions require approval, events can be public/members-only, Ed has administrator access and a separate treasurer role is available. This written design combines that approval with the previously requested calendar, payments and social integration. The user subsequently requested members-only polls; the proposed poll defaults are included above for review. Written-spec approval is still pending. Implementation planning follows that approval.
+
+
+## Visual review requested
+
+The user cannot assess the text specification comfortably and requested visual designs. Show visual mockups of the homepage, member dashboard and calendar using the approved existing identity and club assets. Label sample member/event data as preview content and do not imply that the screens are already implemented. Word and Excel attachment support is confirmed.
+
+
+## Visual direction approved
+
+The user explicitly approved the homepage, member dashboard and calendar visual direction and the same style on mobile with larger stacked controls. They requested membership and contact mockups next; these have now been produced in the same world for visual review. This approves the visual direction, not unspecified operational details or the still-unwritten implementation plan.
+
+Visual mockups (built-in image-generation tool; illustrative sample data, not working application screenshots):
+- E:/Websites/nettlebed-design-previews-20261018/homepage.png
+- E:/Websites/nettlebed-design-previews-20261018/members-area.png
+- E:/Websites/nettlebed-design-previews-20261018/calendar.png
+- E:/Websites/nettlebed-design-previews-20261018/membership.png
+- E:/Websites/nettlebed-design-previews-20261018/contact.png
+
+Membership mockup preserves the unconfirmed price as awaiting confirmation, twelve-month term, bank-transfer invoice flow and member-account link. Contact mockup shows enquiry categories, photo preparation, three attachment slots and PDF/Word/Excel support. Live bank details, exact membership fee and document byte limits remain unconfirmed. Prompt direction: inherit the approved cream/charcoal/gold design and existing club logo; membership presents the annual invoice/confirmation journey, contact presents accessible enquiry fields and attachment previews. No services were connected or messages sent by producing these images.
