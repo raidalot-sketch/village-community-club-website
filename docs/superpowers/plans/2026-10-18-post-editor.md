@@ -12,3 +12,9 @@ Implementation:
 Ownership: backend worker owns editor helpers, migration, media endpoint, community integration and public article render; root owns editor page, JS/CSS, vendor assets and deployment. Independent reviewer checks final behaviour and security.
 
 Ruling: use Quill 2.0.3, self-hosted, without paid API keys or third-party editor requests. Existing graph tools are unavailable; structural exploration uses source reads/rg fallback.
+
+Completed and deployed to the private HTTPS preview on 18 October 2026. The editor includes rich formatting, inline photos with editable descriptions/captions, cover selection, summary, draft autosave/manual save, word count, undo/redo and live article preview. Long titles wrap. Existing approved posts remain unchanged until revision approval.
+
+Review corrections include optimistic version checks against stale tabs, reversible photo removal/replacement, resuming returned revisions with feedback, preserving document shelf metadata after saves, alignment-aware previews and accessible toolbar labels. The editor's named action buttons cannot override the fetch save URL.
+
+Verification: editor security/integration and community suites passed, as did contact, identity and upload regression checks. Hosted HTTPS checks confirmed protected staging, server WebP processing, real draft save/reopen, formatted HTML/caption round trip and stale-save rejection. Chrome confirmed the actual editor, saving a draft, editing/saving a caption, reloading it and rendering the preview. A clearly labelled private demonstration draft belongs to the preview administrator and remains unpublished. Real-phone HEIC and narrow-screen device acceptance remain separate checks.
