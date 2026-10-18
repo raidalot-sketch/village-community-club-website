@@ -1,7 +1,7 @@
 <?php
 const CLUB_UPLOAD_MAX = 30 * 1024 * 1024;
 function club_storage_root(): string {
-    $root = defined('CLUB_PRIVATE_STORAGE') ? CLUB_PRIVATE_STORAGE : APP_ROOT.'/private-storage';
+    $root = defined('CLUB_PRIVATE_STORAGE') ? CLUB_PRIVATE_STORAGE : dirname(APP_ROOT).'/_private/nettlebed-club-uploads';
     if (!is_dir($root)) mkdir($root, 0750, true);
     if (!is_file($root.'/.htaccess')) file_put_contents($root.'/.htaccess', "Require all denied\n");
     return rtrim($root, '/\\');
@@ -84,6 +84,7 @@ function club_attachment_allowed(array $a): bool {
         $q=db()->prepare('SELECT category FROM contact_enquiries WHERE id=?');$q->execute([$a['owner_id']]);$category=$q->fetchColumn();
         if(!$category)return false;
         if(club_can('enquiries.all') || ($category==='membership' && club_can('enquiries.membership')))return true;
+        if(!club_can('enquiries.handle'))return false;
         $q=db()->prepare('SELECT 1 FROM club_enquiry_routes WHERE user_id=? AND category=?');$q->execute([$uid,$category]);return(bool)$q->fetchColumn();
     }
     if($a['owner_type']==='revision'){

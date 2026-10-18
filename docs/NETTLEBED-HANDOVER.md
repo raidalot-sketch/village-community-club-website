@@ -1,0 +1,31 @@
+# Nettlebed Village Club build
+
+The approved cream, charcoal and gold design is implemented as a PHP/MariaDB website. The working branch is `feature/nettlebed-members-platform` in `raidalot-sketch/village-community-club-website`.
+
+## Working features
+
+- Separate website accounts, committee approval, email verification/reset tokens and explicit member, publisher, treasurer and administrator roles.
+- Moderated news and event submissions, protected revisions, public/member event visibility, month/list calendar, recurring events, cancellation and ICS export.
+- Member polls with one changeable vote per member until closing, aggregate results after closing and no public ballot identities.
+- Contact categories, a private committee inbox, scoped handlers and recoverable resolved status.
+- Three attachments per contribution or enquiry. Original files up to 30 MB. JPEG/PNG/WebP and browser-converted HEIC photographs become optimised images, maximum 2,000 pixels on the longest edge. Standard PDF/DOCX/XLSX files retain their contents. Originals are not retained after image processing. Files live outside the public website and pass authorisation before delivery.
+- Annual membership invoice requests, explicit treasurer bank confirmation, Invoice payment-status checks, idempotent activation and twelve calendar month terms. Renewals extend a current term. Reminders use a deduplicated outbox.
+- Social profile links, consented Facebook display and publisher-only social preparation. Private events and polls cannot enter the social queue.
+
+## Details still required for activation
+
+The annual membership fee is deliberately blank pending Ed's confirmation. Club bank instructions, a dedicated club organisation/client in Invoice, mail delivery and authorised Meta accounts also need configuration. The Invoice adapter is implemented separately on `feature/nettlebed-membership-merchant-adapter` in `raidalot-sketch/bivetica-invoice`; it has not been deployed to live Invoice.
+
+Facebook/Instagram automatic transmission remains disabled and labelled connection required. Instagram display needs an authorised feed connection. No payments, emails or social posts were sent by build tests. Draft policy content needs club review before public launch.
+
+## Hosting and operations
+
+Private HTTPS preview: `https://nettlebedvillageclub.4x4hashtag.co.za`. It is restricted to the current development connection and marked noindex. The original demo is preserved. The purchased final domain is `nettlebedvillageclub.co.uk`; final DNS launch has not been performed.
+
+The new site uses its own database and private storage on HawkHost. Configuration and generated access details are outside the public folder, excluded from Git. Host-side deployment backups are outside the website. Do not commit credentials, enquiry files, uploaded images or database exports.
+
+The maintenance entry point is `php bin/club-maintenance.php`. Email sending additionally requires an enabled mail configuration and explicit `--deliver`; ambiguous or failed sends need review rather than automatic repeat transmission.
+
+## Validation
+
+CLI suites cover identity/roles, membership settlement and retries, moderation/recurrence/DST/ICS, ballots, private enquiries, image/document validation, and integration consent/outbox rules. Database tests use the isolated local preview database and roll their fixtures back. Browser checks use the HTTPS preview; phone camera/HEIC testing on real devices remains a launch check.

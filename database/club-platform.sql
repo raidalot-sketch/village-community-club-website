@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS club_memberships (
  starts_on DATE NULL, expires_on DATE NULL, invoice_public_id VARCHAR(100) NULL, external_ref VARCHAR(190) NOT NULL UNIQUE,
  amount_minor INT UNSIGNED NULL, currency CHAR(3) NOT NULL DEFAULT 'GBP', payment_reference VARCHAR(100) NULL,
  confirmed_by INT UNSIGNED NULL, confirmed_at DATETIME NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
- INDEX(user_id,status), FOREIGN KEY(user_id) REFERENCES club_users(id)
+ INDEX(user_id,status), UNIQUE KEY uq_club_invoice(invoice_public_id), FOREIGN KEY(user_id) REFERENCES club_users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE TABLE IF NOT EXISTS club_posts (
  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, author_user_id INT UNSIGNED NOT NULL, title VARCHAR(190) NOT NULL,
@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS club_posts (
  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
  FOREIGN KEY(author_user_id) REFERENCES club_users(id), INDEX(status,published_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+ALTER TABLE club_memberships ADD UNIQUE KEY IF NOT EXISTS uq_club_invoice(invoice_public_id);
 CREATE TABLE IF NOT EXISTS club_revisions (
  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, owner_type VARCHAR(30) NOT NULL, owner_id INT UNSIGNED NOT NULL,
  author_user_id INT UNSIGNED NOT NULL, payload JSON NOT NULL, status ENUM('submitted','approved','rejected') NOT NULL DEFAULT 'submitted',

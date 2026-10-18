@@ -2,8 +2,9 @@
 require_once __DIR__ . '/includes/bootstrap.php';
 seo_set(['title' => 'Welcome', 'description' => get_setting('site_tagline'), 'image' => site_image_url('hero_image_path', 'images/club-building.jpg')]);
 seo_add_schema(schema_organization());
-$events = db()->query("SELECT * FROM events WHERE status='published' AND visibility='public' AND deleted_at IS NULL AND event_date >= CURDATE() ORDER BY event_date, start_time LIMIT 3")->fetchAll();
-$news = db()->query("SELECT * FROM news_articles WHERE status='published' AND deleted_at IS NULL ORDER BY published_at DESC LIMIT 3")->fetchAll();
+$events=array_slice(club_calendar_occurrences(date('Y-m-d'),date('Y-m-d',strtotime('+6 months')),false),0,3);
+foreach($events as &$event){$event['event_date']=$event['occurrence_date'];$event['start_time']=$event['all_day']?null:$event['start_at']->format('H:i:s');}unset($event);
+$news = db()->query("SELECT title,slug,summary,published_at,'news-detail.php' AS route FROM news_articles WHERE status='published' AND deleted_at IS NULL UNION ALL SELECT title,slug,content AS summary,published_at,'post.php' AS route FROM club_posts WHERE status='published' ORDER BY published_at DESC LIMIT 3")->fetchAll();
 require_once __DIR__ . '/includes/header.php';
 ?>
 <section class="club-hero">
@@ -29,7 +30,7 @@ require_once __DIR__ . '/includes/header.php';
         <p>Find your next evening out, catch up with friends and see what’s happening at the club.</p>
         <?php if ($events): ?>
         <div class="event-list"><?php foreach ($events as $event): ?>
-            <a class="event-row" href="<?= e(site_url('/event-detail.php?slug=' . urlencode($event['slug']))) ?>">
+            <a class="event-row" href="<?= e(site_url('/event-detail.php?slug=' . urlencode($event['slug']).'&date='.$event['occurrence_date'])) ?>">
                 <time datetime="<?= e($event['event_date']) ?>"><strong><?= e(format_date($event['event_date'], 'j')) ?></strong><span><?= e(format_date($event['event_date'], 'M')) ?></span></time>
                 <div><h3><?= e($event['title']) ?></h3><p><?= e(format_time($event['start_time'])) ?><?= $event['venue'] ? ' · ' . e($event['venue']) : '' ?></p></div>
                 <span aria-hidden="true">&rarr;</span>
@@ -47,7 +48,7 @@ require_once __DIR__ . '/includes/header.php';
 </div></section>
 <?php if ($news): ?>
 <section class="section"><div class="container"><div class="section__header"><h2>From the club.</h2><a href="<?= e(site_url('/news.php')) ?>">All news</a></div><div class="card-grid">
-<?php foreach ($news as $article): ?><a class="card" href="<?= e(site_url('/news-detail.php?slug=' . urlencode($article['slug']))) ?>"><div class="card__body"><p class="card__meta"><?= e(format_date($article['published_at'])) ?></p><h3><?= e($article['title']) ?></h3><p><?= e(truncate_text($article['summary'], 130)) ?></p></div></a><?php endforeach; ?>
+<?php foreach ($news as $article): ?><a class="card" href="<?= e(site_url('/'.$article['route'].'?slug=' . urlencode($article['slug']))) ?>"><div class="card__body"><p class="card__meta"><?= e(format_date($article['published_at'])) ?></p><h3><?= e($article['title']) ?></h3><p><?= e(truncate_text($article['summary'], 130)) ?></p></div></a><?php endforeach; ?>
 </div></div></section>
 <?php endif; ?>
 <section class="section club-visit"><div class="container"><h2>Find us on the High Street.</h2><div class="club-visit__layout">

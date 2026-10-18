@@ -29,6 +29,7 @@
                 <li><a href="<?= site_url('/gallery.php') ?>">Photographs</a></li>
                 <li><a href="<?= site_url('/membership.php') ?>">Membership</a></li>
                 <li><a href="<?= site_url('/newsletters.php') ?>">Newsletters</a></li>
+                <li><a href="<?= site_url('/social.php') ?>">Facebook & Instagram</a></li>
                 <li><a href="<?= site_url('/committee.php') ?>">Committee</a></li>
                 <li><a href="<?= site_url('/contact.php') ?>">Contact Us</a></li>
             </ul>

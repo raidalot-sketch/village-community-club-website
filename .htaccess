@@ -9,6 +9,7 @@ Options +FollowSymLinks
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteRule (^|/)\.(?!well-known(?:/|$)) - [F,L]
     RewriteRule ^(?:config|database|docs|documentation|tests|private-storage)(?:/|$) - [F,L]
 
     # Force www-less or www — leave as-is; configure at DNS/cPanel level instead

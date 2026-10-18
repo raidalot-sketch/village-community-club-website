@@ -9,7 +9,7 @@ function club_current_user(): ?array {
 function club_user_has_role(int $id,string $role):bool { $s=db()->prepare('SELECT 1 FROM club_user_roles WHERE user_id=? AND role=?'); $s->execute([$id,$role]); return (bool)$s->fetchColumn(); }
 function club_is_active_member(?int $userId=null):bool {
     $id=$userId??(int)(club_current_user()['id']??0); if (!$id) return false;
-    $s=db()->prepare("SELECT 1 FROM club_users u JOIN club_memberships m ON m.user_id=u.id WHERE u.id=? AND u.status='active' AND u.email_verified_at IS NOT NULL AND m.status='active' AND m.starts_on<=CURDATE() AND m.expires_on>CURDATE() LIMIT 1"); $s->execute([$id]); return (bool)$s->fetchColumn();
+    $s=db()->prepare("SELECT 1 FROM club_users u JOIN club_memberships m ON m.user_id=u.id WHERE u.id=? AND u.status='active' AND u.email_verified_at IS NOT NULL AND m.status='active' AND m.starts_on<=? AND m.expires_on>? LIMIT 1"); $s->execute([$id,date('Y-m-d'),date('Y-m-d')]); return (bool)$s->fetchColumn();
 }
 function club_can(string $capability):bool {
     $u=club_current_user();
