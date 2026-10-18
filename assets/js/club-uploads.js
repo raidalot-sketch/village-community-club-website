@@ -13,7 +13,7 @@ for(const input of document.querySelectorAll('input[type=file][data-club-upload]
   });
  }
  function sync(){const transfer=new DataTransfer();prepared.forEach(f=>transfer.items.add(f));input.files=transfer.files;}
- input.addEventListener('change',async()=>{const batch=++generation;busy=true;invalid=false;prepared=[];preview.replaceChildren();status.textContent='Preparing your files…';input.setCustomValidity('');
+ input.addEventListener('change',async()=>{const batch=++generation;busy=true;input.dataset.clubPreparing='true';invalid=false;prepared=[];preview.replaceChildren();status.textContent='Preparing your files…';input.setCustomValidity('');
  try{const files=Array.from(input.files),results=[];if(input.multiple&&files.length>3)throw Error('Choose up to three files.');
   for(const original of files){if(original.size>max)throw Error('Each file can be up to 30 MB.');let blob=original;const isHEIC=/\.(heic|heif)$/i.test(original.name)||/heic|heif/.test(original.type);
    if(isHEIC){if(typeof window.heic2any!=='function')throw Error('This device could not convert that iPhone photo. Choose a JPEG version and try again.');blob=await window.heic2any({blob:original,toType:'image/jpeg',quality:.9});if(Array.isArray(blob))blob=blob[0];}
@@ -22,7 +22,7 @@ for(const input of document.querySelectorAll('input[type=file][data-club-upload]
   }
   if(batch!==generation)return;prepared=results;sync();paint();status.textContent=prepared.length?'Files ready. Photographs have been resized automatically.':'';
  }catch(error){if(batch!==generation)return;invalid=true;input.setCustomValidity(error.message||'Please choose these files again.');status.textContent=error.message;prepared=[];}
- finally{if(batch===generation)busy=false;}
+ finally{if(batch===generation){busy=false;input.dataset.clubPreparing='false';}}
  });
  form.addEventListener('submit',event=>{if(busy||invalid){event.preventDefault();if(busy)status.textContent='Please wait while your photos are prepared.';input.reportValidity();}});
 }

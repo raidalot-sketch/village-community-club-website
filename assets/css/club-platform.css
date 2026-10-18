@@ -13,3 +13,4 @@
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 
 .form-field{margin-bottom:22px}.form-field label{display:block;margin-bottom:8px}.platform-grid>div>h1{font-size:clamp(2.5rem,4vw,3.8rem);line-height:1.08;letter-spacing:-.035em;margin:20px 0}.contact-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:36px}.contact-grid aside img{width:100%;aspect-ratio:1.5;object-fit:cover;border-radius:4px}@media(max-width:760px){.contact-grid{grid-template-columns:1fr}}
+.rich-content figure{margin:28px 0}.rich-content figure img{display:block;max-width:100%;height:auto;margin-inline:auto}.rich-content figcaption{text-align:center;color:#776d59;font-size:.85rem;margin-top:12px}.rich-content s,.rich-content del{text-decoration:line-through}.rich-content p[style*="text-align"]{max-width:none}
