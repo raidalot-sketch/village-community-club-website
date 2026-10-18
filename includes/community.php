@@ -209,6 +209,16 @@ function club_cancel_event(int $id,string $scope,?string $date,string $reason):v
         if($owns)$pdo->commit();else $pdo->exec('RELEASE SAVEPOINT community_cancel');
     }catch(Throwable $e){if($pdo->inTransaction()){if($owns)$pdo->rollBack();else{$pdo->exec('ROLLBACK TO SAVEPOINT community_cancel');$pdo->exec('RELEASE SAVEPOINT community_cancel');}}throw $e;}
 }
+/** Covers use only approved attachments on events the visitor is allowed to see. */
+function club_event_cover(int $id):?array {
+    $q=db()->prepare("SELECT a.id,e.title FROM club_attachments a JOIN events e ON a.owner_type='event' AND a.owner_id=e.id WHERE e.id=? AND e.status='published' AND e.deleted_at IS NULL AND a.mime IN('image/jpeg','image/png','image/webp')".(club_private_events_allowed()?'':" AND e.visibility='public'").' ORDER BY a.id LIMIT 1');
+    $q->execute([$id]);return $q->fetch()?:null;
+}
+function club_event_time_label(array $event,bool $includeDate=false):string {
+    if($event['all_day'])return 'All day';
+    $format=$includeDate?'j M, H:i':'H:i';$start=$event['start_at']->format($format);
+    return empty($event['end_time'])?'From '.$start:$start.' – '.$event['end_at']->format($format);
+}
 function club_content_attachments(string $kind,int $id,array $skipIds=[]):void {
     foreach(club_attachment_list($kind,$id) as $file){
         if(in_array((int)$file['id'],$skipIds,true))continue;
@@ -221,7 +231,7 @@ function club_ics_escape(string $value):string {return str_replace(["\\","\r\n",
 function club_calendar_ics(array $occurrences):string {
     $lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nettlebed Village Club//Club Calendar//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:Nettlebed Village Club'];
     foreach($occurrences as $event){$lines[]='BEGIN:VEVENT';$lines[]='UID:event-'.$event['id'].'-'.$event['occurrence_date'].'@nettlebedvillageclub.co.uk';$lines[]='DTSTAMP:'.gmdate('Ymd\THis\Z');
-        foreach(['start_at'=>'DTSTART','end_at'=>'DTEND'] as $key=>$label)$lines[]=$event['all_day']?$label.';VALUE=DATE:'.$event[$key]->format('Ymd'):$label.':'.$event[$key]->setTimezone(new DateTimeZone('UTC'))->format('Ymd\THis\Z');
+        foreach(['start_at'=>'DTSTART','end_at'=>'DTEND'] as $key=>$label){if($key==='end_at'&&!$event['all_day']&&empty($event['end_time']))continue;$lines[]=$event['all_day']?$label.';VALUE=DATE:'.$event[$key]->format('Ymd'):$label.':'.$event[$key]->setTimezone(new DateTimeZone('UTC'))->format('Ymd\THis\Z');}
         $lines[]='SUMMARY:'.club_ics_escape($event['title']);$lines[]='DESCRIPTION:'.club_ics_escape(html_entity_decode($event['description']??'',ENT_QUOTES,'UTF-8'));$lines[]='LOCATION:'.club_ics_escape($event['venue']??'');$lines[]='URL:'.site_url('/event-detail.php?slug='.rawurlencode($event['slug']).'&date='.$event['occurrence_date']);$lines[]='END:VEVENT';}
     $lines[]='END:VCALENDAR';$out=[];foreach($lines as $line){while(strlen($line)>73){$part=mb_strcut($line,0,73,'UTF-8');$out[]=$part;$line=' '.substr($line,strlen($part));}$out[]=$line;}return implode("\r\n",$out)."\r\n";
 }

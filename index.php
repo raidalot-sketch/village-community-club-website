@@ -3,12 +3,14 @@ require_once __DIR__ . '/includes/bootstrap.php';
 seo_set(['title' => 'Welcome', 'description' => get_setting('site_tagline'), 'image' => site_image_url('hero_image_path', 'images/club-building.jpg')]);
 seo_add_schema(schema_organization());
 // Show the next occurrence of each activity, so weekly repeats do not crowd out other events.
-$events=[];$homeEventIds=[];
+$homeActivities=[];$homeEventIds=[];
 foreach(club_calendar_occurrences(date('Y-m-d'),date('Y-m-d',strtotime('+6 months')),false) as $upcoming){
     if(isset($homeEventIds[$upcoming['id']]))continue;
-    $homeEventIds[$upcoming['id']]=true;$events[]=$upcoming;
-    if(count($events)===3)break;
+    $homeEventIds[$upcoming['id']]=true;$homeActivities[]=$upcoming;
 }
+usort($homeActivities,fn($a,$b)=>((int)$b['is_featured']<=>(int)$a['is_featured'])?:($a['start_at']<=>$b['start_at']));
+$events=array_slice($homeActivities,0,3);
+usort($events,fn($a,$b)=>$a['start_at']<=>$b['start_at']);
 foreach($events as &$event){$event['event_date']=$event['occurrence_date'];$event['start_time']=$event['all_day']?null:$event['start_at']->format('H:i:s');}unset($event);
 $news = db()->query("SELECT title,slug,summary,published_at,NULL AS cover_attachment_id,'news-detail.php' AS route FROM news_articles WHERE status='published' AND deleted_at IS NULL UNION ALL SELECT title,slug,COALESCE(NULLIF(summary,''),content) AS summary,published_at,cover_attachment_id,'post.php' AS route FROM club_posts WHERE status='published' ORDER BY published_at DESC LIMIT 3")->fetchAll();
 require_once __DIR__ . '/includes/header.php';
@@ -36,8 +38,9 @@ require_once __DIR__ . '/includes/header.php';
         <p>Find your next evening out, catch up with friends and see what’s happening at the club.</p>
         <?php require __DIR__.'/includes/home-calendar.php'; ?>
         <?php if ($events): ?>
-        <div class="event-list"><?php foreach ($events as $event): ?>
+        <div class="event-list"><?php foreach ($events as $event): $eventCover=club_event_cover((int)$event['id']); ?>
             <a class="event-row" href="<?= e(site_url('/event-detail.php?slug=' . urlencode($event['slug']).'&date='.$event['occurrence_date'])) ?>">
+                <?php if($eventCover): ?><img class="event-row__poster" src="<?= e(club_media_url((int)$eventCover['id'])) ?>" alt="" loading="lazy"><?php endif ?>
                 <time datetime="<?= e($event['event_date']) ?>"><strong><?= e(format_date($event['event_date'], 'j')) ?></strong><span><?= e(format_date($event['event_date'], 'M')) ?></span></time>
                 <div><h3><?= e($event['title']) ?></h3><p><?= e(format_time($event['start_time'])) ?><?= $event['venue'] ? ' · ' . e($event['venue']) : '' ?></p></div>
                 <span aria-hidden="true">&rarr;</span>
