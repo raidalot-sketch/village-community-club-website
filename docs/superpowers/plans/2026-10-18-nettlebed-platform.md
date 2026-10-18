@@ -66,3 +66,16 @@ Files: includes/club-membership.php, includes/club-integrations.php, payment-cal
 - [ ] Commit and push verified source. Report working preview and concrete external setup dependencies.
 
 Execution: parallel workers own disjoint modules; root coordinates shared schema, integration, uploads, visual system and deployment. No further preference interview is required.
+
+## Execution result, 18 October 2026
+
+- [x] Foundation, roles, moderated content/calendar, polls, private contact uploads/inbox and approved visual styling implemented and committed.
+- [x] Scoped Invoice merchant adapter and website membership/payment-status integration implemented, tested and pushed on their respective feature branches. Server-to-server bearer authentication is used; no unauthenticated browser payment callback can activate membership.
+- [x] Phone-photo resizing and private PDF/DOCX/XLSX storage implemented and regression checked.
+- [x] Source and database backed up; isolated private HTTPS preview deployed with noindex and connection restrictions.
+- [x] Live HTTPS login, public/private routes, CSRF, contact/image processing and media authorisation verified. Actual homepage/contact screenshots captured.
+- [x] Both repositories pushed. Handover records live setup dependencies.
+- [ ] Final fee, bank instructions, club Invoice organisation/client, authorised email/Meta connections and final-domain launch.
+- [ ] Real-phone camera/HEIC and narrow-screen acceptance. Browser extension panel blocked further interactive browser testing; remaining server acceptance checks passed directly over HTTPS.
+
+The external account dependencies are visible disconnected states. Automatic Facebook/Instagram transmission is not implemented as a live connection; approved public-content requests are captured for that connection. No incidental real-world emails, social posts or payments were sent during verification.

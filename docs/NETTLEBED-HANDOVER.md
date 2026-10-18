@@ -29,3 +29,7 @@ The maintenance entry point is `php bin/club-maintenance.php`. Email sending add
 ## Validation
 
 CLI suites cover identity/roles, membership settlement and retries, moderation/recurrence/DST/ICS, ballots, private enquiries, image/document validation, and integration consent/outbox rules. Database tests use the isolated local preview database and roll their fixtures back. Browser checks use the HTTPS preview; phone camera/HEIC testing on real devices remains a launch check.
+
+Hosted acceptance checks passed on 18 October 2026: eight public HTTPS screens, six authenticated committee/member screens, a real preview-account login, CSRF rejection, blocked configuration/database/Git/test paths, contact submission with server-processed WebP attachment, authorised media delivery and anonymous denial. The labelled test enquiry remains in the private preview inbox. Chrome rendered the homepage and contact form; an extension panel interrupted further browser automation, so the remaining route/authentication checks used direct HTTPS requests. Narrow-screen behaviour and real-device HEIC handling still require device acceptance.
+
+Both website and Invoice adapter branches are pushed to GitHub. The adapter has 26 passing Laravel tests with 190 assertions; website suites include 19 identity, 31 membership, 30 poll, 27 integration and nine upload checks, plus community and enquiry scenarios. The later credit/refund of a paid invoice requires committee review; it does not automatically revoke club membership.
