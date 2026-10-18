@@ -16,7 +16,7 @@ The approved cream, charcoal and gold design is implemented as a PHP/MariaDB web
 
 The annual membership fee is deliberately blank pending Ed's confirmation. Club bank instructions, a dedicated club organisation/client in Invoice, mail delivery and authorised Meta accounts also need configuration. The Invoice adapter is implemented separately on `feature/nettlebed-membership-merchant-adapter` in `raidalot-sketch/bivetica-invoice`; it has not been deployed to live Invoice.
 
-Facebook/Instagram automatic transmission remains disabled and labelled connection required. Instagram display needs an authorised feed connection. No payments, emails or social posts were sent by build tests. Draft policy content needs club review before public launch.
+Approved posts now queue Facebook and Instagram delivery automatically. Actual transmission remains disabled and labelled connection required until the club accounts and public delivery environment are configured. Instagram display needs an authorised feed connection. No payments, emails or social posts were sent by build tests. Draft policy content needs club review before public launch.
 
 ## Hosting and operations
 
@@ -41,3 +41,9 @@ Member posts now use a self-hosted visual editor with headings, emphasis, lists,
 Apply `database/club-editor.sql` after `database/club-platform.sql` when installing/updating. It adds the summary/cover fields and author-bound upload staging sessions. Staging sessions expire after seven days; files remain outside the public folder. Three-file and 30 MB original-photo limits continue to apply. A private unpublished editor demonstration is available to publishers; no sample article was published and no social messages were sent.
 
 The default creation flow is now a familiar Create a post composer with author/avatar, a prompted text box, a photo grid and Post button. Formatting is optional. Write an article opens the full workspace, and switching views keeps unsaved writing in the same editor. Apply `database/club-composer.sql` after the editor migration; existing posts default to article, while quick posts generate their own internal titles. Post still means submission for committee approval, as stated on screen; it does not transmit to Facebook. Photo-only posts are supported. The upload action is Photo; video is not enabled by this change.
+
+## Automatic sharing after approval
+
+Post approval commits one automatic delivery request per Facebook/Instagram channel. Pending requests follow approved revisions; sent or ambiguous deliveries are never automatically repeated. The website stays published if either provider fails. The committee can see each status in My posts and Club settings. Existing legacy manual requests and draft demonstrations are not picked up by the new worker. Events remain calendar-only unless an explicit legacy sharing request is prepared.
+
+See `docs/social-publishing.md` for private configuration, professional Instagram/Page authorisation, signed approved-image delivery, scheduler setup and the staged activation checklist. The private preview continues to block actual transmission and public image fetches. No live Meta post is part of automated acceptance.

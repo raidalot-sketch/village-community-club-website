@@ -77,3 +77,13 @@ define('APP_ENV', 'production');
 // This is set to true automatically by install.php and should be false
 // (or the file removed) on every live/public installation.
 define('INSTALLER_UNLOCKED', false);
+
+// Automatic social delivery: keep disabled until the club has authorised its
+// Facebook Page and linked professional Instagram account. Store real values
+// in private server configuration, never in Git or the settings database.
+define('CLUB_SOCIAL_PUBLISH_ENABLED', false);
+define('CLUB_SOCIAL_PUBLIC_MEDIA_READY', false);
+define('CLUB_META_GRAPH_VERSION', ''); // Supported version selected during setup.
+define('CLUB_META_PAGE_ID', '');
+define('CLUB_META_PAGE_TOKEN', '');
+define('CLUB_META_INSTAGRAM_ID', '');

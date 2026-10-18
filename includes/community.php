@@ -131,6 +131,7 @@ function club_content_moderate(string $kind,int $id,string $action,string $note=
             $pdo->prepare("UPDATE $table SET status=?,reviewer_note=?$extra WHERE id=?")->execute([$status,$note,$id]);
             if($action==='unpublish')$pdo->prepare("UPDATE club_revisions SET status='rejected',reviewer_note='Publication withdrawn; submit changes again.' WHERE owner_type=? AND owner_id=? AND status='submitted'")->execute([$kind,$id]);
         }
+        if($kind==='post'&&$action==='approve')club_social_approved_post($id);
         club_content_audit($revisionId?'revision.'.$action:$action,$kind,$id);if($ownsTransaction)$pdo->commit();else $pdo->exec('RELEASE SAVEPOINT community_work');
     }catch(Throwable $e){if($pdo->inTransaction()){if($ownsTransaction)$pdo->rollBack();else{$pdo->exec('ROLLBACK TO SAVEPOINT community_work');$pdo->exec('RELEASE SAVEPOINT community_work');}}throw $e;}
 }

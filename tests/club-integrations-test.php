@@ -55,7 +55,7 @@ try{
     check(str_contains($html,'Allow and show Facebook posts')&&str_contains($html,'Instagram profile is being confirmed'),'Public social page provides explicit consent and honest disconnected state');
     $_SERVER['REQUEST_METHOD']='POST';$_POST=['action'=>'show_facebook','csrf_token'=>csrf_token()];ob_start();include APP_ROOT.'/social.php';$html=ob_get_clean();
     check(str_contains($html,'<iframe')&&str_contains($html,'facebook.com/plugins/page.php'),'Only explicit consent renders optional Facebook embed');
-    $statuses=club_integration_status();check(str_contains($statuses['facebook'],'disabled')&&str_contains($statuses['instagram'],'disabled'),'Connection status never claims enabled social publication');
+    $statuses=club_integration_status();check(str_contains($statuses['facebook'],'Connection required')&&str_contains($statuses['instagram'],'Connection required'),'Connection status never claims enabled social publication');
 }finally{$pdo->rollBack();unset($_SESSION['club_user_id'],$_SESSION['club_auth_sig']);}
 foreach($checks as $message)echo 'PASS: '.$message."\n";
 echo 'All '.count($checks)." integration checks passed; fixtures rolled back.\n";

@@ -20,10 +20,36 @@ function club_integration_status():array
 {
     return [
         'invoice'=>defined('CLUB_INVOICE_API_BASE') && defined('CLUB_INVOICE_CLIENT_TOKEN') && CLUB_INVOICE_API_BASE!=='' && CLUB_INVOICE_CLIENT_TOKEN!=='' ? 'Configuration present — connection not verified' : 'Connection required',
-        'facebook'=>'Connection required — automatic publishing is disabled',
-        'instagram'=>'Connection required — automatic publishing is disabled',
+        'facebook'=>club_social_connection_ready('facebook') ? 'Automatic sharing configured — delivery results appear below' : 'Connection required — approved posts wait here until connected',
+        'instagram'=>club_social_connection_ready('instagram') ? 'Automatic sharing configured — delivery results appear below' : 'Connection required — approved posts wait here until connected',
         'email'=>'Delivery is captured until an authorised mail connection is enabled',
     ];
+}
+
+/** Approval and the two delivery requests commit together; no network runs in moderation. */
+function club_social_approved_post(int $id):void
+{
+    $payload=club_social_snapshot('post',$id);
+    $payload['auto_share']=true;
+    foreach(['facebook','instagram'] as $channel){
+        $key='approved-'.$channel.'-post-'.$id;
+        club_queue_outbox($channel,$key,$payload,club_social_connection_ready($channel)?'pending':'connection_required');
+        // Pending announcements follow the latest approved revision. Never resend a sent or ambiguous request.
+        db()->prepare("UPDATE club_outbox SET payload=?,last_error=NULL,updated_at=NOW() WHERE event_key=? AND status IN('pending','connection_required')")
+            ->execute([json_encode($payload,JSON_THROW_ON_ERROR),$key]);
+    }
+}
+
+function club_social_post_deliveries(int $id):array
+{
+    $q=db()->prepare("SELECT channel,status,remote_id,last_error,created_at,updated_at FROM club_outbox WHERE event_key IN(?,?) ORDER BY channel");
+    $q->execute(['approved-facebook-post-'.$id,'approved-instagram-post-'.$id]);
+    return $q->fetchAll();
+}
+
+function club_social_status_label(string $status):string
+{
+    return match($status){'sent'=>'Shared','pending'=>'Queued','processing'=>'Sending','failed'=>'Needs attention','connection_required'=>'Waiting for account connection',default=>'Not queued'};
 }
 
 function club_social_url(string $channel,string $url):string
