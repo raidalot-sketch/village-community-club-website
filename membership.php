@@ -1,35 +1,8 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
-
-$page = get_page('membership');
-
-seo_set([
-    'title' => $page['meta_title'] ?? 'Membership',
-    'description' => $page['meta_description'] ?? 'Join ' . get_setting('site_name', SITE_NAME),
-]);
-
-require_once __DIR__ . '/includes/header.php';
-?>
-
-<section class="page-hero">
-    <div class="container">
-        <h1><?= e($page['title'] ?? 'Membership') ?></h1>
-        <p>Find out about becoming a member of your village club.</p>
-    </div>
-</section>
-
-<section class="section">
-    <div class="container">
-        <?php if (is_placeholder($page['content'] ?? '')): ?>
-            <span class="placeholder-flag">Placeholder text — edit from Admin &gt; Pages &gt; Membership</span>
-        <?php endif; ?>
-        <div class="rich-content" style="max-width:820px;">
-            <?= $page['content'] ?? '<p>Content coming soon.</p>' ?>
-        </div>
-        <p class="mt-lg">
-            <a class="btn btn--primary" href="<?= site_url('/contact.php?subject=Membership') ?>">Ask About Joining</a>
-        </p>
-    </div>
-</section>
-
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+require_once __DIR__.'/includes/bootstrap.php';
+$fee=filter_var(club_setting('membership_fee_minor'),FILTER_VALIDATE_INT);$ready=club_membership_payment_ready();
+seo_set(['title'=>'Membership','description'=>'Become part of Nettlebed Village Club. Annual membership, local events and a welcoming place to meet.']);require APP_ROOT.'/includes/header.php';?>
+<section class="page-hero"><div class="container"><p class="eyebrow">YOUR VILLAGE. YOUR CLUB.</p><h1>A little more local life.</h1><p>Good company, things to look forward to, and a say in your village club.</p></div></section>
+<section class="section"><div class="container membership-layout"><div><p class="eyebrow">BELONG AT NETTLEBED</p><h2>Make yourself at home.</h2><p>Nettlebed Village Club brings people together. Whether you’re catching up at the bar, enjoying an event or sharing an idea, there’s a place for you here.</p><div class="platform-grid"><section class="platform-panel"><h3>Be part of club life</h3><p>Discover what’s on, see members-only events and keep up with club news.</p></section><section class="platform-panel"><h3>Make it your own</h3><p>Suggest an event or share a story. The committee reviews submissions before they appear.</p></section><section class="platform-panel"><h3>Have your say</h3><p>Take part in member polls and help shape ideas for the club.</p></section><section class="platform-panel"><h3>Keep things simple</h3><p>Manage your profile and annual renewal in one place, with a reminder before your term ends.</p></section></div><h2 class="mt-lg">Joining is straightforward.</h2><ol><li>Create your website account.</li><li>The committee approves your account and confirms your email.</li><li>Once payment arrangements are ready, request your membership invoice and pay using its reference.</li><li>Your confirmed payment activates twelve months of membership.</li></ol><p>Already a member? <a href="<?=e(site_url('/login.php'))?>">Log in to manage your membership</a>.</p></div>
+<aside class="membership-card platform-panel"><p class="eyebrow">ANNUAL MEMBERSHIP</p><h2><?=($fee!==false && $fee>0)?'£'.number_format($fee/100,2):'A year of belonging'?></h2><p><?=($fee!==false && $fee>0)?'One annual payment. Twelve months of membership.':'The annual fee is being confirmed with the committee.'?></p><p>No automatic renewal. We’ll remind you when it’s time to renew.</p><?php if(!$ready):?><div class="notice"><p>Online membership payments are being prepared. You can create your website account now or contact the club about joining.</p></div><?php endif;?><a class="btn btn--primary" href="<?=e(site_url(club_current_user()?'/members/membership.php':'/register.php'))?>"><?=club_current_user()?'My membership':'Create your account'?></a><p><a href="<?=e(site_url('/contact.php?type=membership'))?>">Ask about membership</a></p><p class="muted">Membership and website access are confirmed by the club.</p></aside></div></section>
+<?php require APP_ROOT.'/includes/footer.php';?>
