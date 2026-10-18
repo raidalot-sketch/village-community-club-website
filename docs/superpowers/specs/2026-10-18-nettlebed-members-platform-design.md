@@ -71,6 +71,24 @@ Lock the question, choices and audience once voting starts. Material corrections
 
 Private polls and results never enter public search, sitemaps, social feeds, social publishing queues or public exports. Voting does not send email or social messages. These are informal club opinion polls; do not label them formal elections, proxy votes or binding resolutions without a separately agreed process.
 
+## Contact form and enquiry routing
+
+Confirmed by the user: retain a public contact form, send notifications to thenettlebedclub@gmail.com, route enquiry types to the appropriate committee members and allow file attachments. The existing contact form is the starting point; routing and attachments are additions, not implemented features.
+
+Fields: name, email, optional phone, enquiry type (general, membership, hall hire), message and optional attachments. General enquiries default to the confirmed club Gmail address. Administrators configure the recipient for each category; until a category destination is confirmed, it falls back to the club Gmail address. Never invent committee email addresses or route messages based on visitor-supplied destination addresses.
+
+Enquiries are stored privately, with a reference, category, created time, assignment, status and notification-delivery state. Access is scoped: Administrators can triage all enquiries; the Treasurer can handle membership/payment enquiries; other committee users receive explicit category assignments. Publisher status alone does not grant access to private correspondence. Add a narrowly scoped enquiry-handler capability/category assignment when a recipient needs dashboard access, without granting site administration. Member accounts see only their own submissions where an account history is offered; visitors do not gain an inbox.
+
+Attachment proposal: allow JPEG, PNG, WebP and PDF only, at most three files and 5 MB per file. Validate content type, size and image structure on the server; reject executable files, SVG, HTML and archives. Use random stored filenames and keep original display names sanitised. Store files outside the public document root or behind an authenticated authorised download handler. Public upload URLs and email links must not bypass the enquiry’s access rules. Scan attachments when a supported scanner is available and keep a clear operational record if no scanner is configured; do not claim files are virus-free.
+
+Notification emails contain the enquiry reference, type and a link to the protected enquiry view. Do not automatically attach untrusted visitor files to committee emails. Routing to a committee mailbox does not grant website access; any necessary handler role is assigned separately. Staff replies use the configured club sender; validate reply-to addresses and guard against mail-header injection.
+
+Use CSRF protection, per-source throttling, the existing honeypot, input limits and accessible field-level validation. A valid message must not be discarded merely because the visitor completed the form quickly. Preserve entered values after validation errors, explain rejected attachments and prevent accidental duplicate submissions after retries.
+
+Persist a valid enquiry before queueing notifications. A failed notification does not lose the message or falsely claim email delivery: show a saved-enquiry reference, record the failure for committee attention and retry boundedly. Tests use a mail capture; enabling the notification feature is not permission to send real test messages.
+
+Tell visitors how their enquiry and attachments are handled, using the club’s confirmed retention period and final privacy notice. Do not request sensitive documents in the form by default. Attachment limits, category destinations and retention are configuration/release details to confirm; the feature requirements themselves are approved.
+
 ## Annual membership and Invoice
 
 Proposed membership states: awaiting review, awaiting payment, active, expired, suspended and cancelled. Payment state and moderation/account state remain separate.
@@ -124,6 +142,7 @@ Use HawkHost cron for reminders, integration delivery/retries and reconciliation
 - Early renewal, expiry, pending payment, reversals and reminder deduplication have meaningful integration tests.
 - Social failures/expired credentials remain visible; retries do not duplicate posts; private details never enter public social payloads.
 - Poll eligibility, single-vote enforcement, concurrent submissions, change-of-vote, closing boundaries, result visibility and cancelled polls have server-side tests. No member ballot choices appear in public/member/admin aggregate screens or audit logs.
+- Contact-form routing cannot be changed by a visitor; category-specific handler access is enforced. Oversized/disallowed files fail safely, private attachments cannot be downloaded without authorisation, and mail failure leaves the enquiry saved and available for retry.
 - New features are tested in staging before release; no real membership payment, email or social post is sent as an incidental test.
 
 ## Remaining facts to confirm
@@ -134,6 +153,8 @@ These are configuration/release dependencies rather than permission to invent va
 - Approval process for new members and the membership start/early-renewal rule.
 - Confirmed club bank details, treasurer identity and an existing/new club organisation in Invoice.
 - Reminder timing, sender and membership/import details.
+- Category-specific committee email destinations and handler assignments; general/default enquiries go to the confirmed club Gmail address.
+- Contact-enquiry retention and the proposed attachment size/count limits.
 - Instagram username/account type and authorised Facebook/Instagram account administrator.
 - Whether hall-booking management is wanted later; it is outside this calendar scope.
 
