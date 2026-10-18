@@ -50,6 +50,10 @@ try{
     $pdo->prepare("INSERT INTO club_attachments(owner_type,owner_id,user_id,storage_path,original_name,mime,bytes) VALUES('post',?,?,?,'poster.webp','image/webp',100)")->execute([$postId,$users['member'],$tag.'.webp']);
     club_social_queue('post',$postId,['instagram']);$q=$pdo->prepare("SELECT status,payload FROM club_outbox WHERE channel='instagram' AND event_key LIKE ?");$q->execute(['social-instagram-post-'.$postId.'-%']);$instagramRequest=$q->fetch();
     check($instagramRequest['status']==='connection_required'&&json_decode($instagramRequest['payload'],true)['image_attachment_id']>0,'Instagram preparation stores approved image reference without sending');
+    $_SESSION['club_user_id']=$users['administrator'];$_SERVER['REQUEST_METHOD']='POST';$_POST=['action'=>'check_social','csrf_token'=>csrf_token()];
+    ob_start();include APP_ROOT.'/admin/club-settings.php';$settingsHtml=ob_get_clean();
+    check(str_contains($settingsHtml,'Check connection without posting')&&str_contains($settingsHtml,'Add a valid Page ID'),'Administrator can check missing social configuration without sending or changing settings');
+    check(club_setting('enquiry_recipient')==='thenettlebedclub@gmail.com','Connection check leaves existing club settings unchanged');
     unset($_SESSION['club_user_id']);$_POST=[];$_SERVER['REQUEST_METHOD']='GET';ob_start();include APP_ROOT.'/social.php';$html=ob_get_clean();
     check(!str_contains($html,'<iframe')&&!str_contains($html,'facebook.com/plugins/page.php'),'Public social page makes no embed request before consent');
     check(str_contains($html,'Allow and show Facebook posts')&&str_contains($html,'Instagram profile is being confirmed'),'Public social page provides explicit consent and honest disconnected state');
